@@ -7,7 +7,7 @@
 #define DBG_PERF_READ(reg) (*(volatile uint32_t *)(DBG_PERF_SPI_BASE+reg))
 #define DBG_PERF_WRITE(reg, val) ((*(volatile uint32_t *)(DBG_PERF_SPI_BASE+reg)) = (val))
 
-#include "spiDebug.structs.h"
+#include "./spiDebug.structs.h"
 
 /*
 struct dbg_spi_reg_X{};
@@ -58,13 +58,20 @@ Version register
 SPI_DATE_REG Version control 0x00F0 0x00F0 R/W
   */
 
-  void regWrite(uint32_t reg, uint32_t val);
-  uint32_t regRead(uint32_t reg);
-  bool regGet(uint32_t val, int pos);
-  int regGet(uint32_t val, int x, int y);
-  bool modeValidate(void);
+	void regWrite(uint32_t reg, uint32_t val);
+	uint32_t regRead(uint32_t reg);
 
-  public:
+	// Helps isoltate fields within the 32 bit registers.
+	bool regGet(uint32_t val, int pos);
+	int regGet(uint32_t val, int x, int y);
+
+	// Helps convert register structs into single register values.
+	uint32_t regSet(uint32_t reg, bool val, int pos);
+	uint32_t regSet(uint32_t reg, int val, int x, int y);
+
+	bool modeValidate(void);
+
+	public:
     /* User-defined control registers */
     struct dbg_spi_reg_cmd sr_cmd;
     struct dbg_spi_reg_addr sr_addr;
@@ -144,7 +151,41 @@ SPI_DATE_REG Version control 0x00F0 0x00F0 R/W
     void printTimings(bool onlyCoreVals);
     void printClocks(bool onlyCoreVals);
     void printCtrlConfs(bool onlyCoreVals);
-    void printUserDefs(bool onlyCoreVals);
+	void printUserDefs(bool onlyCoreVals);
+
+    // register write functions
+	void patchUserDef(bool writeMode);
+	void patch_sr_cmd(bool writeMode);
+    void patch_sr_addr(bool writeMode);
+    void patch_sr_user(bool writeMode);
+    void patch_sr_user1(bool writeMode);
+    void patch_sr_user2(bool writeMode);
+
+	void patchCtrlConf(bool writeMode);
+	void patch_sr_ctrl(bool writeMode);
+    void patch_sr_msdlen(bool writeMode);
+    void patch_sr_misc(bool writeMode);
+    void patch_sr_dmaconf(bool writeMode);
+    void patch_sr_slave(bool writeMode);
+    void patch_sr_slave1(bool writeMode);
+
+	void patchClock(bool writeMode);
+	void patch_sr_clock(bool writeMode);
+    void patch_sr_gate(bool writeMode);
+
+	void patchTiming(bool writeMode);
+	void patch_sr_dinmode(bool writeMode);
+    void patch_sr_dinnum(bool writeMode);
+    void patch_sr_doutmode(bool writeMode);
+
+	void patchInterupts(bool writeMode);
+	void patch_sr_dmaintena(bool writeMode);
+    void patch_sr_dmaintclr(bool writeMode);
+    void patch_sr_dmaintraw(bool writeMode);
+    void patch_sr_dmaintst(bool writeMode);
+    void patch_sr_dmaintset(bool writeMode);
+
+	void patchAll(bool writeMode);
 
     // Helpful Functions
     bool isSlave(void);

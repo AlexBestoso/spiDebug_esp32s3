@@ -1,4 +1,4 @@
-#include "spiDebug.class.h"
+#include "./spiDebug.class.h"
 #include <Arduino.h>
 /* (D/C)tors */
 SpiDebug::SpiDebug() {
@@ -34,6 +34,25 @@ int SpiDebug::regGet(uint32_t val, int x, int y) {
 
   int result = (val & (grabber << x)) >> x;
   return result;
+}
+
+
+uint32_t SpiDebug::regSet(uint32_t reg, bool val, int pos){
+	int v = val ? 1 : 0;
+	reg &= ~(1<<pos);
+	reg += (v<<pos);
+	return reg;
+}
+uint32_t SpiDebug::regSet(uint32_t reg, int val, int x, int y){
+	int s = y - x;
+	int g = 0;
+	for(int i=0; i<s; i++)
+		g = (g << 1) + 1;
+	
+	val &= g;
+	reg &= ~(1<<x);
+	reg += (val << x);
+	return reg;
 }
 
 
@@ -964,6 +983,536 @@ void SpiDebug::printUserDefs(bool onlyCoreVals) {
     Serial.printf("\tMST Rempty Err End Enable : %s\n", this->sr_user2.spi_mst_rempty_err_end_en == true ? "true" : "false");
     Serial.printf("\tCommand Value : 0x%X\n", this->sr_user2.spi_usr_command_value);
   }
+}
+
+void SpiDebug::patchUserDef(bool writeMode){
+	this->patch_sr_cmd(writeMode);
+	this->patch_sr_addr(writeMode);
+	this->patch_sr_user(writeMode);
+	this->patch_sr_user1(writeMode);
+	this->patch_sr_user2(writeMode);
+}
+void SpiDebug::patch_sr_cmd(bool writeMode){
+	uint32_t r = this->sr_cmd.val;
+	r = this->regSet(r, this->sr_cmd.spi_user, this->sr_cmd.spi_user_pos);
+	r = this->regSet(r, this->sr_cmd.spi_update, this->sr_cmd.spi_update_pos);
+	if(writeMode){
+		this->regWrite(this->sr_cmd.base_2, r);
+		this->init_sr_cmd();
+	}else{
+		this->sr_cmd.val = r;
+	}
+}
+void SpiDebug::patch_sr_addr(bool writeMode){
+	uint32_t r = this->sr_addr.val;
+	r = this->regSet(r, this->sr_addr.spi_usr_addr_value, 0, 31);
+	if(writeMode){
+		this->regWrite(this->sr_addr.base_2, r);
+		this->init_sr_addr();
+	}else{
+		this->sr_addr.val = r;
+	}
+}
+void SpiDebug::patch_sr_user(bool writeMode){
+	uint32_t r = this->sr_user.val;
+	r = this->regSet(r, this->sr_user.spi_usr_command, this->sr_user.spi_usr_command_pos);
+	r = this->regSet(r, this->sr_user.spi_usr_addr, this->sr_user.spi_usr_addr_pos);
+	r = this->regSet(r, this->sr_user.spi_usr_dummy, this->sr_user.spi_usr_dummy_pos);
+	r = this->regSet(r, this->sr_user.spi_usr_miso, this->sr_user.spi_usr_miso_pos);
+	r = this->regSet(r, this->sr_user.spi_usr_mosi, this->sr_user.spi_usr_mosi_pos);
+	r = this->regSet(r, this->sr_user.spi_usr_dummy_idle, this->sr_user.spi_usr_dummy_idle_pos);
+	r = this->regSet(r, this->sr_user.spi_usr_mosi_highpart, this->sr_user.spi_usr_mosi_highpart_pos);
+	r = this->regSet(r, this->sr_user.spi_usr_miso_highpart, this->sr_user.spi_usr_miso_highpart_pos);
+	r = this->regSet(r, this->sr_user.spi_sio, this->sr_user.spi_sio_pos);
+	r = this->regSet(r, this->sr_user.r_spi_usr_conf_nxt, this->sr_user.r_spi_usr_conf_nxt_pos);
+	r = this->regSet(r, this->sr_user.r_spi_fwrite_oct, this->sr_user.r_spi_fwrite_oct_pos);
+	r = this->regSet(r, this->sr_user.spi_fwrite_quad, this->sr_user.spi_fwrite_quad_pos);
+	r = this->regSet(r, this->sr_user.spi_fwrite_dual, this->sr_user.spi_fwrite_dual_pos);
+	r = this->regSet(r, this->sr_user.spi_usr_ck_out_edge, this->sr_user.spi_usr_ck_out_edge_pos);
+	r = this->regSet(r, this->sr_user.spi_rsck_i_edge, this->sr_user.spi_rsck_i_edge_pos);
+	r = this->regSet(r, this->sr_user.spi_cs_setup, this->sr_user.spi_cs_setup_pos);
+	r = this->regSet(r, this->sr_user.spi_cs_hold, this->sr_user.spi_cs_hold_pos);
+	r = this->regSet(r, this->sr_user.spi_tsck_i_edge, this->sr_user.spi_tsck_i_edge_pos);
+	r = this->regSet(r, this->sr_user.r_spi_opi_mode, this->sr_user.r_spi_opi_mode_pos);
+	r = this->regSet(r, this->sr_user.spi_qpi_mode, this->sr_user.spi_qpi_mode_pos);
+	r = this->regSet(r, this->sr_user.spi_doutdin, this->sr_user.spi_doutdin_pos);
+
+	if(writeMode){
+		this->regWrite(this->sr_user.base_2, r);
+		this->init_sr_user();
+	}else{
+		this->sr_user.val = r;
+	}
+}
+void SpiDebug::patch_sr_user1(bool writeMode){
+	uint32_t r = this->sr_user1.val;
+	
+	r = this->regSet(r, this->sr_user1.spi_usr_addr_bitlen, this->sr_user1.spi_usr_addr_bitlen_x, this->sr_user1.spi_usr_addr_bitlen_y);
+
+  	r = this->regSet(r, this->sr_user1.spi_cs_hold_time, this->sr_user1.spi_cs_hold_time_x, this->sr_user1.spi_cs_hold_time_y);
+
+  	r = this->regSet(r, this->sr_user1.spi_cs_setup_time, this->sr_user1.spi_cs_setup_time_x, this->sr_user1.spi_cs_setup_time_y);
+
+  	r = this->regSet(r, this->sr_user1.spi_mst_wfull_err_end_en, this->sr_user1.spi_mst_wfull_err_end_en_pos);
+
+  	r = this->regSet(r, this->sr_user1.spi_usr_dummy_cyclelen, this->sr_user1.spi_usr_dummy_cyclelen_x, this->sr_user1.spi_usr_dummy_cyclelen_y);
+	if(writeMode){
+		this->regWrite(this->sr_user1.base_2, r);
+		this->init_sr_user1();
+	}else{
+		this->sr_user1.val = r;	
+	}
+
+}
+void SpiDebug::patch_sr_user2(bool writeMode){
+	uint32_t r = this->sr_user2.val;
+	
+	r = this->regSet(r, this->sr_user2.spi_usr_command_bitlen, this->sr_user2.spi_usr_command_bitlen_x,this->sr_user2.spi_usr_command_bitlen_y);
+
+  	r = this->regSet(r, this->sr_user2.spi_mst_rempty_err_end_en, this->sr_user2.spi_mst_rempty_err_end_en_pos);
+
+  	r = this->regSet(r, this->sr_user2.spi_usr_command_value, this->sr_user2.spi_usr_command_value_x,this->sr_user2.spi_usr_command_value_y);
+	if(writeMode){
+		this->regWrite(this->sr_user2.base_2, r);
+		this->init_sr_user2();
+	}else{
+		this->sr_user2.val = r;
+	}
+
+}
+
+void SpiDebug::patchCtrlConf(bool writeMode){
+	this->patch_sr_ctrl(writeMode);
+	this->patch_sr_msdlen(writeMode);
+	this->patch_sr_misc(writeMode);
+	this->patch_sr_dmaconf(writeMode);
+	this->patch_sr_slave(writeMode);
+	this->patch_sr_slave1(writeMode);
+}
+void SpiDebug::patch_sr_ctrl(bool writeMode){
+	uint32_t r = this->sr_ctrl.val;
+	  r = this->regSet(r, this->sr_ctrl.spi_wr_bit_order, this->sr_ctrl.spi_wr_bit_order_x, this->sr_ctrl.spi_wr_bit_order_y);
+
+  r = this->regSet(r, this->sr_ctrl.spi_rd_bit_order, this->sr_ctrl.spi_rd_bit_order_x, this->sr_ctrl.spi_rd_bit_order_y);
+
+  r = this->regSet(r, this->sr_ctrl.spi_wp_pol, this->sr_ctrl.spi_wp_pol_pos);
+  r = this->regSet(r, this->sr_ctrl.spi_hold_pol, this->sr_ctrl.spi_hold_pol_pos);
+  r = this->regSet(r, this->sr_ctrl.spi_d_pol, this->sr_ctrl.spi_d_pol_pos);
+  r = this->regSet(r, this->sr_ctrl.spi_q_pol, this->sr_ctrl.spi_q_pol_pos);
+  r = this->regSet(r, this->sr_ctrl.r_spi_fread_oct, this->sr_ctrl.r_spi_fread_oct_pos);
+  r = this->regSet(r, this->sr_ctrl.spi_fread_quad, this->sr_ctrl.spi_fread_quad_pos);
+  r = this->regSet(r, this->sr_ctrl.spi_fread_dual, this->sr_ctrl.spi_fread_dual_pos);
+  r = this->regSet(r, this->sr_ctrl.r_spi_fcmd_oct, this->sr_ctrl.r_spi_fcmd_oct_pos);
+  r = this->regSet(r, this->sr_ctrl.spi_fcmd_quad, this->sr_ctrl.spi_fcmd_quad_pos);
+  r = this->regSet(r, this->sr_ctrl.spi_fcmd_dual, this->sr_ctrl.spi_fcmd_dual_pos);
+  r = this->regSet(r, this->sr_ctrl.r_spi_faddr_oct, this->sr_ctrl.r_spi_faddr_oct_pos);
+  r = this->regSet(r, this->sr_ctrl.spi_faddr_quad, this->sr_ctrl.spi_faddr_quad_pos);
+  r = this->regSet(r, this->sr_ctrl.spi_faddr_dual, this->sr_ctrl.spi_faddr_dual_pos);
+  r = this->regSet(r, this->sr_ctrl.spi_dummy_out, this->sr_ctrl.spi_dummy_out_pos);
+	if(writeMode){
+		this->regWrite(this->sr_ctrl.base_2, r);
+		this->init_sr_ctrl();
+	}else{
+		this->sr_ctrl.val = r;
+	}
+}
+void SpiDebug::patch_sr_msdlen(bool writeMode){
+	uint32_t r = this->sr_msdlen.val;
+	
+	r = this->regSet(r, this->sr_msdlen.spi_ms_data_bitlen, this->sr_msdlen.spi_ms_data_bitlen_x, this->sr_msdlen.spi_ms_data_bitlen_y);
+	if(writeMode){
+		this->regWrite(this->sr_msdlen.base_2, r);
+		this->init_sr_msdlen();
+	}else{
+		this->sr_msdlen.val = r;
+	}
+}
+void SpiDebug::patch_sr_misc(bool writeMode){
+	uint32_t r = this->sr_misc.val;
+	r = this->regSet(r, this->sr_misc.spi_quad_din_pin_swap, this->sr_misc.spi_quad_din_pin_swap_pos);
+	r = this->regSet(r, this->sr_misc.spi_cs_keep_active, this->sr_misc.spi_cs_keep_active_pos);
+	r = this->regSet(r, this->sr_misc.spi_ck_idle_edge, this->sr_misc.spi_ck_idle_edge_pos);
+	r = this->regSet(r, this->sr_misc.spi_dqs_idle_edge, this->sr_misc.spi_dqs_idle_edge_pos);
+	r = this->regSet(r, this->sr_misc.spi_slave_cs_pol, this->sr_misc.spi_slave_cs_pol_pos);
+	r = this->regSet(r, this->sr_misc.spi_cmd_dtr_en, this->sr_misc.spi_cmd_dtr_en_pos);
+	r = this->regSet(r, this->sr_misc.spi_addr_dtr_en, this->sr_misc.spi_addr_dtr_en_pos);
+	r = this->regSet(r, this->sr_misc.spi_data_dtr_en, this->sr_misc.spi_data_dtr_en_pos);
+	r = this->regSet(r, this->sr_misc.spi_clk_data_dtr_en, this->sr_misc.spi_clk_data_dtr_en_pos);
+
+	if(this->spiMode == 3){
+		r = this->regSet(r, this->sr_misc.spi_master_cs_pol, this->sr_misc.spi_master_cs_pol_x, this->sr_misc.spi_master_cs_pol_y3);
+	}else{
+		r = this->regSet(r, this->sr_misc.spi_master_cs_pol, this->sr_misc.spi_master_cs_pol_x, this->sr_misc.spi_master_cs_pol_y);
+	}
+
+	r = this->regSet(r, this->sr_misc.spi_ck_dis, this->sr_misc.spi_ck_dis_pos);
+	r = this->regSet(r, this->sr_misc.spi_cs5_dis, this->sr_misc.spi_cs5_dis_pos);
+	r = this->regSet(r, this->sr_misc.spi_cs4_dis, this->sr_misc.spi_cs4_dis_pos);
+	r = this->regSet(r, this->sr_misc.spi_cs3_dis, this->sr_misc.spi_cs3_dis_pos);
+	r = this->regSet(r, this->sr_misc.spi_cs2_dis, this->sr_misc.spi_cs2_dis_pos);
+	r = this->regSet(r, this->sr_misc.spi_cs1_dis, this->sr_misc.spi_cs1_dis_pos);
+	r = this->regSet(r, this->sr_misc.spi_cs0_dis, this->sr_misc.spi_cs0_dis_pos);
+	if(writeMode){
+		this->regWrite(this->sr_misc.base_2, r);
+		this->init_sr_misc();
+	}else{
+		this->sr_misc.val = r;
+	}
+      
+}
+void SpiDebug::patch_sr_dmaconf(bool writeMode){
+	uint32_t r = this->sr_dmaconf.val;
+  r = this->regSet(r, this->sr_dmaconf.spi_dma_afifo_rst, this->sr_dmaconf.spi_dma_afifo_rst_pos);
+  r = this->regSet(r, this->sr_dmaconf.spi_buf_afifo_rst, this->sr_dmaconf.spi_buf_afifo_rst_pos);
+  r = this->regSet(r, this->sr_dmaconf.spi_rx_afifo_rst, this->sr_dmaconf.spi_rx_afifo_rst_pos);
+  r = this->regSet(r, this->sr_dmaconf.spi_dma_tx_ena, this->sr_dmaconf.spi_dma_tx_ena_pos);
+  r = this->regSet(r, this->sr_dmaconf.spi_dma_rx_ena, this->sr_dmaconf.spi_dma_rx_ena_pos);
+  r = this->regSet(r, this->sr_dmaconf.spi_rx_eof_en, this->sr_dmaconf.spi_rx_eof_en_pos);
+  r = this->regSet(r, this->sr_dmaconf.spi_slv_tx_seg_trans_clr_en, this->sr_dmaconf.spi_slv_tx_seg_trans_clr_en_pos);
+  r = this->regSet(r, this->sr_dmaconf.spi_slv_rx_seg_trans_clr_en, this->sr_dmaconf.spi_slv_rx_seg_trans_clr_en_pos);
+  r = this->regSet(r, this->sr_dmaconf.spi_dma_slv_seg_trans_en, this->sr_dmaconf.spi_dma_slv_seg_trans_en_pos);
+  r = this->regSet(r, this->sr_dmaconf.spi_dma_infifo_full, this->sr_dmaconf.spi_dma_infifo_full_pos);
+  r = this->regSet(r, this->sr_dmaconf.spi_dma_outfifo_empty, this->sr_dmaconf.spi_dma_outfifo_empty_pos);
+	if(writeMode){
+		this->regWrite(this->sr_dmaconf.base_2, r);
+		this->init_sr_dmaconf();
+	}else{
+		this->sr_dmaconf.val = r;
+	}
+}
+void SpiDebug::patch_sr_slave(bool writeMode){
+	uint32_t r = this->sr_slave.val;
+	r = this->regSet(r, this->sr_slave.r_spi_usr_conf, this->sr_slave.r_spi_usr_conf_pos);
+	r = this->regSet(r, this->sr_slave.spi_soft_reset, this->sr_slave.spi_soft_reset_pos);
+	r = this->regSet(r, this->sr_slave.spi_slave_mode, this->sr_slave.spi_slave_mode_pos);
+
+	r = this->regSet(r, this->sr_slave.r_spi_dma_seg_magic_value, this->sr_slave.r_spi_dma_seg_magic_value_x, this->sr_slave.r_spi_dma_seg_magic_value_y);
+
+	r = this->regSet(r, this->sr_slave.spi_slv_wrbuf_bitlen_en, this->sr_slave.spi_slv_wrbuf_bitlen_en_pos);
+	r = this->regSet(r, this->sr_slave.spi_slv_rdbuf_bitlen_en, this->sr_slave.spi_slv_rdbuf_bitlen_en_pos);
+	r = this->regSet(r, this->sr_slave.spi_slv_wrdma_bitlen_en, this->sr_slave.spi_slv_wrdma_bitlen_en_pos);
+	r = this->regSet(r, this->sr_slave.spi_slv_rddma_bitlen_en, this->sr_slave.spi_slv_rddma_bitlen_en_pos);
+	r = this->regSet(r, this->sr_slave.spi_rsck_data_out, this->sr_slave.spi_rsck_data_out_pos);
+	r = this->regSet(r, this->sr_slave.spi_clk_mode_13, this->sr_slave.spi_clk_mode_13_pos);
+
+	r = this->regSet(r, this->sr_slave.spi_clk_mode, this->sr_slave.spi_clk_mode_x, this->sr_slave.spi_clk_mode_y);
+
+	if(writeMode){
+		this->regWrite(this->sr_slave.base_2, r);
+		this->init_sr_slave();
+	}else{
+		this->sr_slave.val = r;
+	}
+}
+void SpiDebug::patch_sr_slave1(bool writeMode){
+	uint32_t r = this->sr_slave1.val;
+	r = this->regSet(r, this->sr_slave1.spi_slv_last_addr, this->sr_slave1.spi_slv_last_addr_x, this->sr_slave1.spi_slv_last_addr_y);
+
+  	r = this->regSet(r, this->sr_slave1.spi_slv_last_command, this->sr_slave1.spi_slv_last_command_x, this->sr_slave1.spi_slv_last_command_y);
+
+	r = this->regSet(r, this->sr_slave1.spi_slv_data_bitlen, this->sr_slave1.spi_slv_data_bitlen_x, this->sr_slave1.spi_slv_data_bitlen_y);
+
+	if(writeMode){
+		this->regWrite(this->sr_slave1.base_2, r);
+		this->init_sr_slave1();
+	}else{
+		this->sr_slave1.val = r;
+	}
+
+}
+
+void SpiDebug::patchClock(bool writeMode){
+	this->patch_sr_clock(writeMode);
+	this->patch_sr_gate(writeMode);
+}
+void SpiDebug::patch_sr_clock(bool writeMode){
+	uint32_t r = this->sr_clock.val;
+	 r = this->regSet(r, this->sr_clock.spi_clk_equ_sysclk, this->sr_clock.spi_clk_equ_sysclk_pos);
+
+	r = this->regSet(r, this->sr_clock.spi_clkdiv_pre, this->sr_clock.spi_clkdiv_pre_x, this->sr_clock.spi_clkdiv_pre_y);
+
+	r = this->regSet(r, this->sr_clock.spi_clkcnt_n, this->sr_clock.spi_clkcnt_n_x, this->sr_clock.spi_clkcnt_n_y);
+
+	r = this->regSet(r, this->sr_clock.spi_clkcnt_h, this->sr_clock.spi_clkcnt_h_x, this->sr_clock.spi_clkcnt_h_y);
+
+	r = this->regSet(r, this->sr_clock.spi_clkcnt_l, this->sr_clock.spi_clkcnt_l_x, this->sr_clock.spi_clkcnt_l_y);
+	if(writeMode){
+		this->regWrite(this->sr_clock.base_2, r);
+		this->init_sr_clock();
+	}else{
+		this->sr_clock.val = r;
+	}
+}
+
+void SpiDebug::patch_sr_gate(bool writeMode){
+	uint32_t r = this->sr_gate.val;
+
+	r = this->regSet(r, this->sr_gate.spi_mst_clk_sel, this->sr_gate.spi_mst_clk_sel_pos);
+  	r = this->regSet(r, this->sr_gate.spi_mst_clk_active, this->sr_gate.spi_mst_clk_active_pos);
+ 	r = this->regSet(r, this->sr_gate.spi_clk_en, this->sr_gate.spi_clk_en_pos);
+	
+	if(writeMode){
+		this->regWrite(this->sr_gate.base_2, r);
+		this->init_sr_gate();
+	}else{
+		this->sr_gate.val = r;
+	}
+}
+
+void SpiDebug::patchTiming(bool writeMode){
+	this->patch_sr_dinmode(writeMode);
+	this->patch_sr_dinnum(writeMode);
+	this->patch_sr_doutmode(writeMode);
+}
+void SpiDebug::patch_sr_dinmode(bool writeMode){
+	uint32_t r = this->sr_dinmode.val;
+
+	r = this->regSet(r, this->sr_dinmode.spi_timing_hclk_active, this->sr_dinmode.spi_timing_hclk_active_pos);
+
+  	r = this->regSet(r, this->sr_dinmode.r_spi_din7_mode, this->sr_dinmode.r_spi_din7_mode_x, this->sr_dinmode.r_spi_din7_mode_y); 
+
+  	r = this->regSet(r, this->sr_dinmode.r_spi_din6_mode, this->sr_dinmode.r_spi_din6_mode_x, this->sr_dinmode.r_spi_din6_mode_y); 
+
+  	r = this->regSet(r, this->sr_dinmode.r_spi_din5_mode, this->sr_dinmode.r_spi_din5_mode_x, this->sr_dinmode.r_spi_din5_mode_y); 
+
+  	r = this->regSet(r, this->sr_dinmode.r_spi_din4_mode, this->sr_dinmode.r_spi_din4_mode_x, this->sr_dinmode.r_spi_din4_mode_y); 
+
+  	r = this->regSet(r, this->sr_dinmode.spi_din3_mode, this->sr_dinmode.spi_din3_mode_x, this->sr_dinmode.spi_din3_mode_y); 
+
+  	r = this->regSet(r, this->sr_dinmode.spi_din2_mode, this->sr_dinmode.spi_din2_mode_x, this->sr_dinmode.spi_din2_mode_y); 
+
+  	r = this->regSet(r, this->sr_dinmode.spi_din1_mode, this->sr_dinmode.spi_din1_mode_x, this->sr_dinmode.spi_din1_mode_y); 
+
+  	r = this->regSet(r, this->sr_dinmode.spi_din0_mode, this->sr_dinmode.spi_din0_mode_x, this->sr_dinmode.spi_din0_mode_y); 
+
+	if(writeMode){
+		this->regWrite(this->sr_dinmode.base_2, r);
+		this->init_sr_dinmode();
+	}else{
+		this->sr_dinmode.val = r;
+	}
+
+}
+void SpiDebug::patch_sr_dinnum(bool writeMode){
+	uint32_t r = this->sr_dinnum.val;
+
+  	r = this->regSet(r, this->sr_dinnum.r_spi_din7_num, this->sr_dinnum.r_spi_din7_num_x, this->sr_dinnum.r_spi_din7_num_y);
+
+  	r = this->regSet(r, this->sr_dinnum.r_spi_din6_num, this->sr_dinnum.r_spi_din6_num_x, this->sr_dinnum.r_spi_din6_num_y);
+
+  	r = this->regSet(r, this->sr_dinnum.r_spi_din5_num, this->sr_dinnum.r_spi_din5_num_x, this->sr_dinnum.r_spi_din5_num_y);
+
+  	r = this->regSet(r, this->sr_dinnum.r_spi_din4_num, this->sr_dinnum.r_spi_din4_num_x, this->sr_dinnum.r_spi_din4_num_y);
+
+  	r = this->regSet(r, this->sr_dinnum.spi_din3_num, this->sr_dinnum.spi_din3_num_x, this->sr_dinnum.spi_din3_num_y);
+
+  	r = this->regSet(r, this->sr_dinnum.spi_din2_num, this->sr_dinnum.spi_din2_num_x, this->sr_dinnum.spi_din2_num_y);
+
+  	r = this->regSet(r, this->sr_dinnum.spi_din1_num, this->sr_dinnum.spi_din1_num_x, this->sr_dinnum.spi_din1_num_y);
+
+	  r = this->regSet(r, this->sr_dinnum.spi_din0_num, this->sr_dinnum.spi_din0_num_x, this->sr_dinnum.spi_din0_num_y);
+
+	if(writeMode){
+		this->regWrite(this->sr_dinnum.base_2, r);
+		this->init_sr_dinnum();
+	}else{
+		this->sr_dinnum.val = r;
+	}
+}
+void SpiDebug::patch_sr_doutmode(bool writeMode){
+	uint32_t r = this->sr_doutmode.val;
+		
+ 	r = this->regSet(r, this->sr_doutmode.r_spi_d_dqs_mode, this->sr_doutmode.r_spi_d_dqs_mode_pos);
+  	r = this->regSet(r, this->sr_doutmode.r_spi_dout7_mode, this->sr_doutmode.r_spi_dout7_mode_pos);
+  	r = this->regSet(r, this->sr_doutmode.r_spi_dout6_mode, this->sr_doutmode.r_spi_dout6_mode_pos);
+  	r = this->regSet(r, this->sr_doutmode.r_spi_dout5_mode, this->sr_doutmode.r_spi_dout5_mode_pos);
+  	r = this->regSet(r, this->sr_doutmode.r_spi_dout4_mode, this->sr_doutmode.r_spi_dout4_mode_pos);
+  	r = this->regSet(r, this->sr_doutmode.spi_dout3_mode, this->sr_doutmode.spi_dout3_mode_pos);
+  	r = this->regSet(r, this->sr_doutmode.spi_dout2_mode, this->sr_doutmode.spi_dout2_mode_pos);
+  	r = this->regSet(r, this->sr_doutmode.spi_dout1_mode, this->sr_doutmode.spi_dout1_mode_pos);
+  	r = this->regSet(r, this->sr_doutmode.spi_dout0_mode, this->sr_doutmode.spi_dout0_mode_pos);
+
+
+	if(writeMode){
+		this->regWrite(this->sr_doutmode.base_2, r);
+		this->init_sr_doutmode();
+	}else{
+		this->sr_doutmode.val = r;
+	}
+}
+
+void SpiDebug::patchInterupts(bool writeMode){
+	this->patch_sr_dmaintena(writeMode);
+	this->patch_sr_dmaintclr(writeMode);
+	this->patch_sr_dmaintraw(writeMode);
+	this->patch_sr_dmaintst(writeMode);
+	this->patch_sr_dmaintset(writeMode);
+}
+void SpiDebug::patch_sr_dmaintena(bool writeMode){
+	uint32_t r = this->sr_dmaintena.val;
+	
+	r = this->regSet(r, this->sr_dmaintena.spi_app1_int_ena, this->sr_dmaintena.spi_app1_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_app2_int_ena, this->sr_dmaintena.spi_app2_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_mst_tx_afifo_rempty_err_int_ena, this->sr_dmaintena.spi_mst_tx_afifo_rempty_err_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_mst_rx_afifo_wfull_err_int_ena, this->sr_dmaintena.spi_mst_rx_afifo_wfull_err_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_slv_cmd_err_int_ena, this->sr_dmaintena.spi_slv_cmd_err_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.r_spi_seg_magic_err_int_ena, this->sr_dmaintena.r_spi_seg_magic_err_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_dma_seg_trans_done_int_ena, this->sr_dmaintena.spi_dma_seg_trans_done_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_trans_done_int_ena, this->sr_dmaintena.spi_trans_done_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_slv_wr_buf_done_int_ena, this->sr_dmaintena.spi_slv_wr_buf_done_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_slv_rd_buf_done_int_ena, this->sr_dmaintena.spi_slv_rd_buf_done_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_slv_wr_dma_done_int_ena, this->sr_dmaintena.spi_slv_wr_dma_done_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_slv_rd_dma_done_int_ena, this->sr_dmaintena.spi_slv_rd_dma_done_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_slv_cmda_int_ena, this->sr_dmaintena.spi_slv_cmda_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_slv_cmd9_int_ena, this->sr_dmaintena.spi_slv_cmd9_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_slv_cmd8_int_ena, this->sr_dmaintena.spi_slv_cmd8_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_slv_cmd7_int_ena, this->sr_dmaintena.spi_slv_cmd7_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_slv_en_qpi_int_ena, this->sr_dmaintena.spi_slv_en_qpi_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_slv_ex_qpi_int_ena, this->sr_dmaintena.spi_slv_ex_qpi_int_ena_pos);
+	r = this->regSet(r, this->sr_dmaintena.spi_dma_outfifo_empty_err_int_ena, this->sr_dmaintena.spi_dma_outfifo_empty_err_int_ena_pos);
+  	r = this->regSet(r, this->sr_dmaintena.spi_dma_infifo_full_err_int_ena, this->sr_dmaintena.spi_dma_infifo_full_err_int_ena_pos);
+
+	if(writeMode){
+		this->regWrite(this->sr_dmaintena.base_2, r);
+		this->init_sr_dmaintena();
+	}else{
+		this->sr_dmaintena.val = r;	
+	}
+}
+void SpiDebug::patch_sr_dmaintclr(bool writeMode){
+	uint32_t r = this->sr_dmaintclr.val;
+	
+	r = this->regSet(r, this->sr_dmaintclr.spi_app1_int_clr, this->sr_dmaintclr.spi_app1_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_app2_int_clr, this->sr_dmaintclr.spi_app2_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_mst_tx_afifo_rempty_err_int_clr, this->sr_dmaintclr.spi_mst_tx_afifo_rempty_err_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_mst_rx_afifo_wfull_err_int_clr, this->sr_dmaintclr.spi_mst_rx_afifo_wfull_err_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_slv_cmd_err_int_clr, this->sr_dmaintclr.spi_slv_cmd_err_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.r_spi_seg_magic_err_int_clr, this->sr_dmaintclr.r_spi_seg_magic_err_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_dma_seg_trans_done_int_clr, this->sr_dmaintclr.spi_dma_seg_trans_done_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_trans_done_int_clr, this->sr_dmaintclr.spi_trans_done_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_slv_wr_buf_done_int_clr, this->sr_dmaintclr.spi_slv_wr_buf_done_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_slv_rd_buf_done_int_clr, this->sr_dmaintclr.spi_slv_rd_buf_done_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_slv_wr_dma_done_int_clr, this->sr_dmaintclr.spi_slv_wr_dma_done_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_slv_rd_dma_done_int_clr, this->sr_dmaintclr.spi_slv_rd_dma_done_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_slv_cmda_int_clr, this->sr_dmaintclr.spi_slv_cmda_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_slv_cmd9_int_clr, this->sr_dmaintclr.spi_slv_cmd9_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_slv_cmd8_int_clr, this->sr_dmaintclr.spi_slv_cmd8_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_slv_cmd7_int_clr, this->sr_dmaintclr.spi_slv_cmd7_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_slv_en_qpi_int_clr, this->sr_dmaintclr.spi_slv_en_qpi_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_slv_ex_qpi_int_clr, this->sr_dmaintclr.spi_slv_ex_qpi_int_clr_pos);
+	r = this->regSet(r, this->sr_dmaintclr.spi_dma_outfifo_empty_err_int_clr, this->sr_dmaintclr.spi_dma_outfifo_empty_err_int_clr_pos);
+  	r = this->regSet(r, this->sr_dmaintclr.spi_dma_infifo_full_err_int_clr, this->sr_dmaintclr.spi_dma_infifo_full_err_int_clr_pos);
+
+	if(writeMode){
+		this->regWrite(this->sr_dmaintclr.base_2, r);
+		this->init_sr_dmaintclr();
+	}else{
+		this->sr_dmaintclr.val = r;	
+	}
+}
+void SpiDebug::patch_sr_dmaintraw(bool writeMode){
+	uint32_t r = this->sr_dmaintraw.val;
+	
+	r = this->regSet(r, this->sr_dmaintraw.spi_app1_int_raw, this->sr_dmaintraw.spi_app1_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_app2_int_raw, this->sr_dmaintraw.spi_app2_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_mst_tx_afifo_rempty_err_int_raw, this->sr_dmaintraw.spi_mst_tx_afifo_rempty_err_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_mst_rx_afifo_wfull_err_int_raw, this->sr_dmaintraw.spi_mst_rx_afifo_wfull_err_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_slv_cmd_err_int_raw, this->sr_dmaintraw.spi_slv_cmd_err_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.r_spi_seg_magic_err_int_raw, this->sr_dmaintraw.r_spi_seg_magic_err_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_dma_seg_trans_done_int_raw, this->sr_dmaintraw.spi_dma_seg_trans_done_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_trans_done_int_raw, this->sr_dmaintraw.spi_trans_done_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_slv_wr_buf_done_int_raw, this->sr_dmaintraw.spi_slv_wr_buf_done_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_slv_rd_buf_done_int_raw, this->sr_dmaintraw.spi_slv_rd_buf_done_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_slv_wr_dma_done_int_raw, this->sr_dmaintraw.spi_slv_wr_dma_done_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_slv_rd_dma_done_int_raw, this->sr_dmaintraw.spi_slv_rd_dma_done_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_slv_cmda_int_raw, this->sr_dmaintraw.spi_slv_cmda_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_slv_cmd9_int_raw, this->sr_dmaintraw.spi_slv_cmd9_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_slv_cmd8_int_raw, this->sr_dmaintraw.spi_slv_cmd8_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_slv_cmd7_int_raw, this->sr_dmaintraw.spi_slv_cmd7_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_slv_en_qpi_int_raw, this->sr_dmaintraw.spi_slv_en_qpi_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_slv_ex_qpi_int_raw, this->sr_dmaintraw.spi_slv_ex_qpi_int_raw_pos);
+	r = this->regSet(r, this->sr_dmaintraw.spi_dma_outfifo_empty_err_int_raw, this->sr_dmaintraw.spi_dma_outfifo_empty_err_int_raw_pos);
+  	r = this->regSet(r, this->sr_dmaintraw.spi_dma_infifo_full_err_int_raw, this->sr_dmaintraw.spi_dma_infifo_full_err_int_raw_pos);
+
+	if(writeMode){
+		this->regWrite(this->sr_dmaintraw.base_2, r);
+		this->init_sr_dmaintraw();
+	}else{
+		this->sr_dmaintraw.val = r;	
+	}
+}
+void SpiDebug::patch_sr_dmaintst(bool writeMode){
+	uint32_t r = this->sr_dmaintst.val;
+	
+	r = this->regSet(r, this->sr_dmaintst.spi_app1_int_st, this->sr_dmaintst.spi_app1_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_app2_int_st, this->sr_dmaintst.spi_app2_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_mst_tx_afifo_rempty_err_int_st, this->sr_dmaintst.spi_mst_tx_afifo_rempty_err_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_mst_rx_afifo_wfull_err_int_st, this->sr_dmaintst.spi_mst_rx_afifo_wfull_err_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_slv_cmd_err_int_st, this->sr_dmaintst.spi_slv_cmd_err_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.r_spi_seg_magic_err_int_st, this->sr_dmaintst.r_spi_seg_magic_err_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_dma_seg_trans_done_int_st, this->sr_dmaintst.spi_dma_seg_trans_done_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_trans_done_int_st, this->sr_dmaintst.spi_trans_done_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_slv_wr_buf_done_int_st, this->sr_dmaintst.spi_slv_wr_buf_done_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_slv_rd_buf_done_int_st, this->sr_dmaintst.spi_slv_rd_buf_done_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_slv_wr_dma_done_int_st, this->sr_dmaintst.spi_slv_wr_dma_done_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_slv_rd_dma_done_int_st, this->sr_dmaintst.spi_slv_rd_dma_done_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_slv_cmda_int_st, this->sr_dmaintst.spi_slv_cmda_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_slv_cmd9_int_st, this->sr_dmaintst.spi_slv_cmd9_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_slv_cmd8_int_st, this->sr_dmaintst.spi_slv_cmd8_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_slv_cmd7_int_st, this->sr_dmaintst.spi_slv_cmd7_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_slv_en_qpi_int_st, this->sr_dmaintst.spi_slv_en_qpi_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_slv_ex_qpi_int_st, this->sr_dmaintst.spi_slv_ex_qpi_int_st_pos);
+	r = this->regSet(r, this->sr_dmaintst.spi_dma_outfifo_empty_err_int_st, this->sr_dmaintst.spi_dma_outfifo_empty_err_int_st_pos);
+  	r = this->regSet(r, this->sr_dmaintst.spi_dma_infifo_full_err_int_st, this->sr_dmaintst.spi_dma_infifo_full_err_int_st_pos);
+
+	if(writeMode){
+		this->regWrite(this->sr_dmaintst.base_2, r);
+		this->init_sr_dmaintst();
+	}else{
+		this->sr_dmaintst.val = r;	
+	}
+
+}
+void SpiDebug::patch_sr_dmaintset(bool writeMode){
+	uint32_t r = this->sr_dmaintset.val;
+	
+	r = this->regSet(r, this->sr_dmaintset.spi_app1_int_set, this->sr_dmaintset.spi_app1_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_app2_int_set, this->sr_dmaintset.spi_app2_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_mst_tx_afifo_rempty_err_int_set, this->sr_dmaintset.spi_mst_tx_afifo_rempty_err_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_mst_rx_afifo_wfull_err_int_set, this->sr_dmaintset.spi_mst_rx_afifo_wfull_err_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_slv_cmd_err_int_set, this->sr_dmaintset.spi_slv_cmd_err_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.r_spi_seg_magic_err_int_set, this->sr_dmaintset.r_spi_seg_magic_err_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_dma_seg_trans_done_int_set, this->sr_dmaintset.spi_dma_seg_trans_done_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_trans_done_int_set, this->sr_dmaintset.spi_trans_done_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_slv_wr_buf_done_int_set, this->sr_dmaintset.spi_slv_wr_buf_done_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_slv_rd_buf_done_int_set, this->sr_dmaintset.spi_slv_rd_buf_done_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_slv_wr_dma_done_int_set, this->sr_dmaintset.spi_slv_wr_dma_done_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_slv_rd_dma_done_int_set, this->sr_dmaintset.spi_slv_rd_dma_done_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_slv_cmda_int_set, this->sr_dmaintset.spi_slv_cmda_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_slv_cmd9_int_set, this->sr_dmaintset.spi_slv_cmd9_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_slv_cmd8_int_set, this->sr_dmaintset.spi_slv_cmd8_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_slv_cmd7_int_set, this->sr_dmaintset.spi_slv_cmd7_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_slv_en_qpi_int_set, this->sr_dmaintset.spi_slv_en_qpi_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_slv_ex_qpi_int_set, this->sr_dmaintset.spi_slv_ex_qpi_int_set_pos);
+	r = this->regSet(r, this->sr_dmaintset.spi_dma_outfifo_empty_err_int_set, this->sr_dmaintset.spi_dma_outfifo_empty_err_int_set_pos);
+  	r = this->regSet(r, this->sr_dmaintset.spi_dma_infifo_full_err_int_set, this->sr_dmaintset.spi_dma_infifo_full_err_int_set_pos);
+
+
+	if(writeMode){
+		this->regWrite(this->sr_dmaintset.base_2, r);
+		this->init_sr_dmaintset();
+	}else{
+		this->sr_dmaintset.val = r;	
+	}
+}
+
+
+void SpiDebug::patchAll(bool writeMode){
+	this->patchUserDef(writeMode);
+	this->patchCtrlConf(writeMode);
+	this->patchClock(writeMode);
+	this->patchTiming(writeMode);
+	this->patchInterupts(writeMode);
 }
 
 /// Make sure to init/refresh before invoking.
