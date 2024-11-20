@@ -187,6 +187,40 @@ SPI_DATE_REG Version control 0x00F0 0x00F0 R/W
 
 	void patchAll(bool writeMode);
 
+	bool compUserDef(SpiDebug cmp, bool printout);
+	bool comp_sr_cmd(SpiDebug cmp, bool printout);
+    bool comp_sr_addr(SpiDebug cmp, bool printout);
+    bool comp_sr_user(SpiDebug cmp, bool printout);
+    bool comp_sr_user1(SpiDebug cmp, bool printout);
+    bool comp_sr_user2(SpiDebug cmp, bool printout);
+
+	bool compCtrlConf(SpiDebug cmp, bool printout);
+	bool comp_sr_ctrl(SpiDebug cmp, bool printout);
+    bool comp_sr_msdlen(SpiDebug cmp, bool printout);
+    bool comp_sr_misc(SpiDebug cmp, bool printout);
+    bool comp_sr_dmaconf(SpiDebug cmp, bool printout);
+    bool comp_sr_slave(SpiDebug cmp, bool printout);
+    bool comp_sr_slave1(SpiDebug cmp, bool printout);
+
+	bool compClock(SpiDebug cmp, bool printout);
+	bool comp_sr_clock(SpiDebug cmp, bool printout);
+    bool comp_sr_gate(SpiDebug cmp, bool printout);
+
+	bool compTiming(SpiDebug cmp, bool printout);
+	bool comp_sr_dinmode(SpiDebug cmp, bool printout);
+    bool comp_sr_dinnum(SpiDebug cmp, bool printout);
+    bool comp_sr_doutmode(SpiDebug cmp, bool printout);
+
+	bool compInterupts(SpiDebug cmp, bool printout);
+	bool comp_sr_dmaintena(SpiDebug cmp, bool printout);
+    bool comp_sr_dmaintclr(SpiDebug cmp, bool printout);
+    bool comp_sr_dmaintraw(SpiDebug cmp, bool printout);
+    bool comp_sr_dmaintst(SpiDebug cmp, bool printout);
+    bool comp_sr_dmaintset(SpiDebug cmp, bool printout);
+
+	bool compAll(SpiDebug cmp, bool printout);
+	void printComp(const char *n1, int v1, int v2, const char *n2);
     // Helpful Functions
     bool isSlave(void);
+
 };

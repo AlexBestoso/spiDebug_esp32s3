@@ -12,3 +12,37 @@ Useage :
 <li>Print out the registers as a whole or independantly. Doing <code>SpiDebug::printAll(false)</code> prints the registers in a decoded form, <code>SpiDebug::printAll(true)</code> will print out only single 32 bit register values for ease of config compairson.</li>
 <li>Change SPI configurations by accessing the <code>SpiDebug::sr_*</code> registers. After changing, write the changes to the register using the <code>SpiDebug::patch*(true)</code> functions. Provide false to convert structs to a 32 bit register value without writing to the register (read only mode)</li>
 </ol>
+
+## Detecting configuration Changes
+<p>
+To detect changes in SPI configurations, use the following psudo code into consideration:
+<code>
+SpiDebug dbgA;
+SpiDebug dbgB;
+
+dbgA.init();
+dbgB.init();
+
+EnableSomeSpiDevice();
+
+dbgB.refresh();
+
+dbgA.compAll(dbgB, true);
+</code><br><br>
+The above would produce a result similar to this:
+
+<code>
+~~~User Defined Register Compairisons~~~
+spi_usr_miso (0x0) vs (0x1) <- cmp
+spi_usr_mosi (0x0) vs (0x1) <- cmp
+spi_doutdin (0x0) vs (0x1) <- cmp
+spi_usr_command_bitlen (0x0) vs (0x7) <- cmp
+spi_mst_rempty_err_end_en (0x0) vs (0x1) <- cmp
+spi_ms_data_bitlen (0x0) vs (0x1ff) <- cmp
+spi_ck_idle_edge (0x0) vs (0x1) <- cmp
+spi_slv_tx_seg_trans_clr_en (0x0) vs (0x1) <- cmp
+spi_slv_rx_seg_trans_clr_en (0x0) vs (0x1) <- cmp
+spi_dma_infifo_full (0x0) vs (0x1) <- cmp
+spi_dma_outfifo_empty (0x0) vs (0x1) <- cmp
+</code>
+</p>

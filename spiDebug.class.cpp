@@ -1515,7 +1515,1287 @@ void SpiDebug::patchAll(bool writeMode){
 	this->patchInterupts(writeMode);
 }
 
+void SpiDebug::printComp(const char *n1, int v1, int v2, const char *n2){
+	Serial.printf("%s (0x%X) vs (0x%x) %s\n", n1, v1, v2, n2);
+}
+bool SpiDebug::compUserDef(SpiDebug cmp, bool printout){
+	if(printout) Serial.printf("~~~User Defined Register Compairisons~~~\n");
+
+	bool ret = this->comp_sr_cmd(cmp, printout);
+	ret = !ret ? (this->comp_sr_addr(cmp, printout) & ret) : this->comp_sr_addr(cmp, printout);
+	ret = !ret ? (this->comp_sr_user(cmp, printout) & ret) : this->comp_sr_user(cmp, printout);
+	ret = !ret ? (this->comp_sr_user1(cmp, printout) & ret) : this->comp_sr_user1(cmp, printout);
+	ret = !ret ? (this->comp_sr_user2(cmp, printout) & ret) : this->comp_sr_user2(cmp, printout);
+	return ret;
+}
+bool SpiDebug::comp_sr_cmd(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_cmd.spi_user == cmp.sr_cmd.spi_user;
+	if(printout && !test)
+		this->printComp("spi_user", this->sr_cmd.spi_user, cmp.sr_cmd.spi_user, "<- cmp");
+	ret &= test;
+
+	test = this->sr_cmd.spi_update == cmp.sr_cmd.spi_update;
+	if(printout && !test)
+		this->printComp("spi_update", this->sr_cmd.spi_update, cmp.sr_cmd.spi_update, "<- cmp");
+	ret &= test;
+
+	if(!ret && printout) Serial.println();
+	return ret;
+}
+bool SpiDebug::comp_sr_addr(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_addr.spi_usr_addr_value == cmp.sr_addr.spi_usr_addr_value;
+	if(printout && !test)
+		this->printComp("spi_usr_addR_value", this->sr_addr.spi_usr_addr_value, cmp.sr_addr.spi_usr_addr_value, "<- cmp");
+	ret &= test;
+	return ret;
+}
+bool SpiDebug::comp_sr_user(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_user.spi_usr_command == cmp.sr_user.spi_usr_command;
+	if(printout && !test)
+		this->printComp("spi_usr_command", this->sr_user.spi_usr_command, cmp.sr_user.spi_usr_command, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_usr_addr == cmp.sr_user.spi_usr_addr;
+	if(printout && !test)
+		this->printComp("spi_usr_addr", this->sr_user.spi_usr_addr, cmp.sr_user.spi_usr_addr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_usr_dummy == cmp.sr_user.spi_usr_dummy;
+	if(printout && !test)
+		this->printComp("spi_usr_dummy", this->sr_user.spi_usr_dummy, cmp.sr_user.spi_usr_dummy, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_usr_miso == cmp.sr_user.spi_usr_miso;
+	if(printout && !test)
+		this->printComp("spi_usr_miso", this->sr_user.spi_usr_miso, cmp.sr_user.spi_usr_miso, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_usr_mosi == cmp.sr_user.spi_usr_mosi;
+	if(printout && !test)
+		this->printComp("spi_usr_mosi", this->sr_user.spi_usr_mosi, cmp.sr_user.spi_usr_mosi, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_usr_dummy_idle == cmp.sr_user.spi_usr_dummy_idle;
+	if(printout && !test)
+		this->printComp("spi_usr_dummy_idle", this->sr_user.spi_usr_dummy_idle, cmp.sr_user.spi_usr_dummy_idle, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_usr_mosi_highpart == cmp.sr_user.spi_usr_mosi_highpart;
+	if(printout && !test)
+		this->printComp("spi_usr_mosi_highpart", this->sr_user.spi_usr_mosi_highpart, cmp.sr_user.spi_usr_mosi_highpart, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_usr_miso_highpart == cmp.sr_user.spi_usr_miso_highpart;
+	if(printout && !test)
+		this->printComp("spi_usr_miso_highpart", this->sr_user.spi_usr_miso_highpart, cmp.sr_user.spi_usr_miso_highpart, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_sio == cmp.sr_user.spi_sio;
+	if(printout && !test)
+		this->printComp("spi_sio", this->sr_user.spi_sio, cmp.sr_user.spi_sio, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.r_spi_usr_conf_nxt == cmp.sr_user.r_spi_usr_conf_nxt;
+	if(printout && !test)
+		this->printComp("r_spi_usr_conf_nxt", this->sr_user.r_spi_usr_conf_nxt, cmp.sr_user.r_spi_usr_conf_nxt, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.r_spi_fwrite_oct == cmp.sr_user.r_spi_fwrite_oct;
+	if(printout && !test)
+		this->printComp("r_spi_fwrite_oct", this->sr_user.r_spi_fwrite_oct, cmp.sr_user.r_spi_fwrite_oct, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_fwrite_quad == cmp.sr_user.spi_fwrite_quad;
+	if(printout && !test)
+		this->printComp("spi_fwrite_quad", this->sr_user.spi_fwrite_quad, cmp.sr_user.spi_fwrite_quad, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_fwrite_dual == cmp.sr_user.spi_fwrite_dual;
+	if(printout && !test)
+		this->printComp("spi_fwrite_dual", this->sr_user.spi_fwrite_dual, cmp.sr_user.spi_fwrite_dual, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_usr_ck_out_edge == cmp.sr_user.spi_usr_ck_out_edge;
+	if(printout && !test)
+		this->printComp("spi_usr_ck_out_edge", this->sr_user.spi_usr_ck_out_edge, cmp.sr_user.spi_usr_ck_out_edge, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_rsck_i_edge == cmp.sr_user.spi_rsck_i_edge;
+	if(printout && !test)
+		this->printComp("spi_rsck_i_edge", this->sr_user.spi_rsck_i_edge, cmp.sr_user.spi_rsck_i_edge, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_cs_setup == cmp.sr_user.spi_cs_setup;
+	if(printout && !test)
+		this->printComp("spi_cs_setup", this->sr_user.spi_cs_setup, cmp.sr_user.spi_cs_setup, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_cs_hold == cmp.sr_user.spi_cs_hold;
+	if(printout && !test)
+		this->printComp("spi_cs_hold", this->sr_user.spi_cs_hold, cmp.sr_user.spi_cs_hold, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_tsck_i_edge == cmp.sr_user.spi_tsck_i_edge;
+	if(printout && !test)
+		this->printComp("spi_tsck_i_edge", this->sr_user.spi_tsck_i_edge, cmp.sr_user.spi_tsck_i_edge, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.r_spi_opi_mode == cmp.sr_user.r_spi_opi_mode;
+	if(printout && !test)
+		this->printComp("r_spi_opi_mode", this->sr_user.r_spi_opi_mode, cmp.sr_user.r_spi_opi_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_qpi_mode == cmp.sr_user.spi_qpi_mode;
+	if(printout && !test)
+		this->printComp("spi_qpi_mode", this->sr_user.spi_qpi_mode, cmp.sr_user.spi_qpi_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user.spi_doutdin == cmp.sr_user.spi_doutdin;
+	if(printout && !test)
+		this->printComp("spi_doutdin", this->sr_user.spi_doutdin, cmp.sr_user.spi_doutdin, "<- cmp");
+	ret &= test;
+	
+
+	return ret;
+}
+bool SpiDebug::comp_sr_user1(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_user1.spi_usr_addr_bitlen == cmp.sr_user1.spi_usr_addr_bitlen;
+	if(printout && !test)
+		this->printComp("spi_usr_addr_bitlen", this->sr_user1.spi_usr_addr_bitlen, cmp.sr_user1.spi_usr_addr_bitlen, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user1.spi_cs_hold_time == cmp.sr_user1.spi_cs_hold_time;
+	if(printout && !test)
+		this->printComp("spi_cs_hold_time", this->sr_user1.spi_cs_hold_time, cmp.sr_user1.spi_cs_hold_time, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user1.spi_cs_setup_time == cmp.sr_user1.spi_cs_setup_time;
+	if(printout && !test)
+		this->printComp("spi_cs_setup_time", this->sr_user1.spi_cs_setup_time, cmp.sr_user1.spi_cs_setup_time, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user1.spi_mst_wfull_err_end_en == cmp.sr_user1.spi_mst_wfull_err_end_en;
+	if(printout && !test)
+		this->printComp("spi_mst_wfull_err_end_en", this->sr_user1.spi_mst_wfull_err_end_en, cmp.sr_user1.spi_mst_wfull_err_end_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user1.spi_usr_dummy_cyclelen == cmp.sr_user1.spi_usr_dummy_cyclelen;
+	if(printout && !test)
+		this->printComp("spi_usr_dummy_cyclelen", this->sr_user1.spi_usr_dummy_cyclelen, cmp.sr_user1.spi_usr_dummy_cyclelen, "<- cmp");
+	ret &= test;
+	
+	return ret;
+}
+bool SpiDebug::comp_sr_user2(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_user2.spi_usr_command_bitlen == cmp.sr_user2.spi_usr_command_bitlen;
+	if(printout && !test)
+		this->printComp("spi_usr_command_bitlen", this->sr_user2.spi_usr_command_bitlen, cmp.sr_user2.spi_usr_command_bitlen, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user2.spi_mst_rempty_err_end_en == cmp.sr_user2.spi_mst_rempty_err_end_en;
+	if(printout && !test)
+		this->printComp("spi_mst_rempty_err_end_en", this->sr_user2.spi_mst_rempty_err_end_en, cmp.sr_user2.spi_mst_rempty_err_end_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_user2.spi_usr_command_value == cmp.sr_user2.spi_usr_command_value;
+	if(printout && !test)
+		this->printComp("spi_usr_command_value", this->sr_user2.spi_usr_command_value, cmp.sr_user2.spi_usr_command_value, "<- cmp");
+	ret &= test;
+	
+	return ret;
+}
+
+bool SpiDebug::compCtrlConf(SpiDebug cmp, bool printout){
+	bool ret = this->comp_sr_ctrl(cmp, printout);
+	ret = !ret ? (this->comp_sr_msdlen(cmp, printout) & ret) : this->comp_sr_msdlen(cmp, printout);
+	ret = !ret ? (this->comp_sr_misc(cmp, printout) & ret) : this->comp_sr_misc(cmp, printout);
+	ret = !ret ? (this->comp_sr_dmaconf(cmp, printout) & ret) : this->comp_sr_dmaconf(cmp, printout);
+	ret = !ret ? (this->comp_sr_slave(cmp, printout) & ret) : this->comp_sr_slave(cmp, printout);
+	ret = !ret ? (this->comp_sr_slave1(cmp, printout) & ret) : this->comp_sr_slave1(cmp, printout);
+	return ret;
+}
+
+bool SpiDebug::comp_sr_ctrl(SpiDebug cmp, bool printout){
+	bool ret = true;
+
+	bool test = this->sr_ctrl.spi_wr_bit_order == cmp.sr_ctrl.spi_wr_bit_order;
+	if(printout && !test)
+		this->printComp("spi_wr_bit_order", this->sr_ctrl.spi_wr_bit_order, cmp.sr_ctrl.spi_wr_bit_order, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.spi_rd_bit_order == cmp.sr_ctrl.spi_rd_bit_order;
+	if(printout && !test)
+		this->printComp("spi_rd_bit_order", this->sr_ctrl.spi_rd_bit_order, cmp.sr_ctrl.spi_rd_bit_order, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.spi_wp_pol == cmp.sr_ctrl.spi_wp_pol;
+	if(printout && !test)
+		this->printComp("spi_wp_pol", this->sr_ctrl.spi_wp_pol, cmp.sr_ctrl.spi_wp_pol, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.spi_hold_pol == cmp.sr_ctrl.spi_hold_pol;
+	if(printout && !test)
+		this->printComp("spi_hold_pol", this->sr_ctrl.spi_hold_pol, cmp.sr_ctrl.spi_hold_pol, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.spi_d_pol == cmp.sr_ctrl.spi_d_pol;
+	if(printout && !test)
+		this->printComp("spi_d_pol", this->sr_ctrl.spi_d_pol, cmp.sr_ctrl.spi_d_pol, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.spi_q_pol == cmp.sr_ctrl.spi_q_pol;
+	if(printout && !test)
+		this->printComp("spi_q_pol", this->sr_ctrl.spi_q_pol, cmp.sr_ctrl.spi_q_pol, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.r_spi_fread_oct == cmp.sr_ctrl.r_spi_fread_oct;
+	if(printout && !test)
+		this->printComp("r_spi_fread_oct", this->sr_ctrl.r_spi_fread_oct, cmp.sr_ctrl.r_spi_fread_oct, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.spi_fread_quad == cmp.sr_ctrl.spi_fread_quad;
+	if(printout && !test)
+		this->printComp("spi_fread_quad", this->sr_ctrl.spi_fread_quad, cmp.sr_ctrl.spi_fread_quad, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.spi_fread_dual == cmp.sr_ctrl.spi_fread_dual;
+	if(printout && !test)
+		this->printComp("spi_fread_dual", this->sr_ctrl.spi_fread_dual, cmp.sr_ctrl.spi_fread_dual, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.r_spi_fcmd_oct == cmp.sr_ctrl.r_spi_fcmd_oct;
+	if(printout && !test)
+		this->printComp("r_spi_fcmd_oct", this->sr_ctrl.r_spi_fcmd_oct, cmp.sr_ctrl.r_spi_fcmd_oct, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.spi_fcmd_quad == cmp.sr_ctrl.spi_fcmd_quad;
+	if(printout && !test)
+		this->printComp("spi_fcmd_quad", this->sr_ctrl.spi_fcmd_quad, cmp.sr_ctrl.spi_fcmd_quad, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.spi_fcmd_dual == cmp.sr_ctrl.spi_fcmd_dual;
+	if(printout && !test)
+		this->printComp("spi_fcmd_dual", this->sr_ctrl.spi_fcmd_dual, cmp.sr_ctrl.spi_fcmd_dual, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.r_spi_faddr_oct == cmp.sr_ctrl.r_spi_faddr_oct;
+	if(printout && !test)
+		this->printComp("r_spi_faddr_oct", this->sr_ctrl.r_spi_faddr_oct, cmp.sr_ctrl.r_spi_faddr_oct, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.spi_faddr_quad == cmp.sr_ctrl.spi_faddr_quad;
+	if(printout && !test)
+		this->printComp("spi_faddr_quad", this->sr_ctrl.spi_faddr_quad, cmp.sr_ctrl.spi_faddr_quad, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.spi_faddr_dual == cmp.sr_ctrl.spi_faddr_dual;
+	if(printout && !test)
+		this->printComp("spi_faddr_dual", this->sr_ctrl.spi_faddr_dual, cmp.sr_ctrl.spi_faddr_dual, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_ctrl.spi_dummy_out == cmp.sr_ctrl.spi_dummy_out;
+	if(printout && !test)
+		this->printComp("spi_dummy_out", this->sr_ctrl.spi_dummy_out, cmp.sr_ctrl.spi_dummy_out, "<- cmp");
+	ret &= test;
+
+	return ret;
+}
+bool SpiDebug::comp_sr_msdlen(SpiDebug cmp, bool printout){
+	bool ret = true;
+	
+  	bool test = this->sr_msdlen.spi_ms_data_bitlen == cmp.sr_msdlen.spi_ms_data_bitlen;
+	if(printout && !test)
+		this->printComp("spi_ms_data_bitlen", this->sr_msdlen.spi_ms_data_bitlen, cmp.sr_msdlen.spi_ms_data_bitlen, "<- cmp");
+	ret &= test;
+	return ret;
+}
+bool SpiDebug::comp_sr_misc(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_misc.spi_quad_din_pin_swap == cmp.sr_misc.spi_quad_din_pin_swap;
+	if(printout && !test)
+		this->printComp("spi_quad_din_pin_swap", this->sr_misc.spi_quad_din_pin_swap, cmp.sr_misc.spi_quad_din_pin_swap, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_cs_keep_active == cmp.sr_misc.spi_cs_keep_active;
+	if(printout && !test)
+		this->printComp("spi_cs_keep_active", this->sr_misc.spi_cs_keep_active, cmp.sr_misc.spi_cs_keep_active, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_ck_idle_edge == cmp.sr_misc.spi_ck_idle_edge;
+	if(printout && !test)
+		this->printComp("spi_ck_idle_edge", this->sr_misc.spi_ck_idle_edge, cmp.sr_misc.spi_ck_idle_edge, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_dqs_idle_edge == cmp.sr_misc.spi_dqs_idle_edge;
+	if(printout && !test)
+		this->printComp("spi_dqs_idle_edge", this->sr_misc.spi_dqs_idle_edge, cmp.sr_misc.spi_dqs_idle_edge, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_slave_cs_pol == cmp.sr_misc.spi_slave_cs_pol;
+	if(printout && !test)
+		this->printComp("spi_slave_cs_pol", this->sr_misc.spi_slave_cs_pol, cmp.sr_misc.spi_slave_cs_pol, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_cmd_dtr_en == cmp.sr_misc.spi_cmd_dtr_en;
+	if(printout && !test)
+		this->printComp("spi_cmd_dtr_en", this->sr_misc.spi_cmd_dtr_en, cmp.sr_misc.spi_cmd_dtr_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_addr_dtr_en == cmp.sr_misc.spi_addr_dtr_en;
+	if(printout && !test)
+		this->printComp("spi_addr_dtr_en", this->sr_misc.spi_addr_dtr_en, cmp.sr_misc.spi_addr_dtr_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_data_dtr_en == cmp.sr_misc.spi_data_dtr_en;
+	if(printout && !test)
+		this->printComp("spi_data_dtr_en", this->sr_misc.spi_data_dtr_en, cmp.sr_misc.spi_data_dtr_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_clk_data_dtr_en == cmp.sr_misc.spi_clk_data_dtr_en;
+	if(printout && !test)
+		this->printComp("spi_clk_data_dtr_en", this->sr_misc.spi_clk_data_dtr_en, cmp.sr_misc.spi_clk_data_dtr_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_master_cs_pol == cmp.sr_misc.spi_master_cs_pol;
+	if(printout && !test)
+		this->printComp("spi_master_cs_pol", this->sr_misc.spi_master_cs_pol, cmp.sr_misc.spi_master_cs_pol, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_ck_dis == cmp.sr_misc.spi_ck_dis;
+	if(printout && !test)
+		this->printComp("spi_ck_dis", this->sr_misc.spi_ck_dis, cmp.sr_misc.spi_ck_dis, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_cs5_dis == cmp.sr_misc.spi_cs5_dis;
+	if(printout && !test)
+		this->printComp("spi_cs5_dis", this->sr_misc.spi_cs5_dis, cmp.sr_misc.spi_cs5_dis, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_cs4_dis == cmp.sr_misc.spi_cs4_dis;
+	if(printout && !test)
+		this->printComp("spi_cs4_dis", this->sr_misc.spi_cs4_dis, cmp.sr_misc.spi_cs4_dis, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_cs3_dis == cmp.sr_misc.spi_cs3_dis;
+	if(printout && !test)
+		this->printComp("spi_cs3_dis", this->sr_misc.spi_cs3_dis, cmp.sr_misc.spi_cs3_dis, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_cs2_dis == cmp.sr_misc.spi_cs2_dis;
+	if(printout && !test)
+		this->printComp("spi_cs2_dis", this->sr_misc.spi_cs2_dis, cmp.sr_misc.spi_cs2_dis, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_cs1_dis == cmp.sr_misc.spi_cs1_dis;
+	if(printout && !test)
+		this->printComp("spi_cs1_dis", this->sr_misc.spi_cs1_dis, cmp.sr_misc.spi_cs1_dis, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_misc.spi_cs0_dis == cmp.sr_misc.spi_cs0_dis;
+	if(printout && !test)
+		this->printComp("spi_cs0_dis", this->sr_misc.spi_cs0_dis, cmp.sr_misc.spi_cs0_dis, "<- cmp");
+	ret &= test;
+	
+
+	return ret;
+}
+bool SpiDebug::comp_sr_dmaconf(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_dmaconf.spi_dma_afifo_rst == cmp.sr_dmaconf.spi_dma_afifo_rst;
+	if(printout && !test)
+		this->printComp("spi_dma_afifo_rst", this->sr_dmaconf.spi_dma_afifo_rst, cmp.sr_dmaconf.spi_dma_afifo_rst, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaconf.spi_buf_afifo_rst == cmp.sr_dmaconf.spi_buf_afifo_rst;
+	if(printout && !test)
+		this->printComp("spi_buf_afifo_rst", this->sr_dmaconf.spi_buf_afifo_rst, cmp.sr_dmaconf.spi_buf_afifo_rst, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaconf.spi_rx_afifo_rst == cmp.sr_dmaconf.spi_rx_afifo_rst;
+	if(printout && !test)
+		this->printComp("spi_rx_afifo_rst", this->sr_dmaconf.spi_rx_afifo_rst, cmp.sr_dmaconf.spi_rx_afifo_rst, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaconf.spi_dma_tx_ena == cmp.sr_dmaconf.spi_dma_tx_ena;
+	if(printout && !test)
+		this->printComp("spi_dma_tx_ena", this->sr_dmaconf.spi_dma_tx_ena, cmp.sr_dmaconf.spi_dma_tx_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaconf.spi_dma_rx_ena == cmp.sr_dmaconf.spi_dma_rx_ena;
+	if(printout && !test)
+		this->printComp("spi_dma_rx_ena", this->sr_dmaconf.spi_dma_rx_ena, cmp.sr_dmaconf.spi_dma_rx_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaconf.spi_rx_eof_en == cmp.sr_dmaconf.spi_rx_eof_en;
+	if(printout && !test)
+		this->printComp("spi_rx_eof_en", this->sr_dmaconf.spi_rx_eof_en, cmp.sr_dmaconf.spi_rx_eof_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaconf.spi_slv_tx_seg_trans_clr_en == cmp.sr_dmaconf.spi_slv_tx_seg_trans_clr_en;
+	if(printout && !test)
+		this->printComp("spi_slv_tx_seg_trans_clr_en", this->sr_dmaconf.spi_slv_tx_seg_trans_clr_en, cmp.sr_dmaconf.spi_slv_tx_seg_trans_clr_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaconf.spi_slv_rx_seg_trans_clr_en == cmp.sr_dmaconf.spi_slv_rx_seg_trans_clr_en;
+	if(printout && !test)
+		this->printComp("spi_slv_rx_seg_trans_clr_en", this->sr_dmaconf.spi_slv_rx_seg_trans_clr_en, cmp.sr_dmaconf.spi_slv_rx_seg_trans_clr_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaconf.spi_dma_slv_seg_trans_en == cmp.sr_dmaconf.spi_dma_slv_seg_trans_en;
+	if(printout && !test)
+		this->printComp("spi_dma_slv_seg_trans_en", this->sr_dmaconf.spi_dma_slv_seg_trans_en, cmp.sr_dmaconf.spi_dma_slv_seg_trans_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaconf.spi_dma_infifo_full == cmp.sr_dmaconf.spi_dma_infifo_full;
+	if(printout && !test)
+		this->printComp("spi_dma_infifo_full", this->sr_dmaconf.spi_dma_infifo_full, cmp.sr_dmaconf.spi_dma_infifo_full, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaconf.spi_dma_outfifo_empty == cmp.sr_dmaconf.spi_dma_outfifo_empty;
+	if(printout && !test)
+		this->printComp("spi_dma_outfifo_empty", this->sr_dmaconf.spi_dma_outfifo_empty, cmp.sr_dmaconf.spi_dma_outfifo_empty, "<- cmp");
+	ret &= test;
+
+
+	return ret;
+}
+bool SpiDebug::comp_sr_slave(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_slave.r_spi_usr_conf == cmp.sr_slave.r_spi_usr_conf;
+	if(printout && !test)
+		this->printComp("r_spi_usr_conf", this->sr_slave.r_spi_usr_conf, cmp.sr_slave.r_spi_usr_conf, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_slave.spi_soft_reset == cmp.sr_slave.spi_soft_reset;
+	if(printout && !test)
+		this->printComp("spi_soft_reset", this->sr_slave.spi_soft_reset, cmp.sr_slave.spi_soft_reset, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_slave.spi_slave_mode == cmp.sr_slave.spi_slave_mode;
+	if(printout && !test)
+		this->printComp("spi_slave_mode", this->sr_slave.spi_slave_mode, cmp.sr_slave.spi_slave_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_slave.r_spi_dma_seg_magic_value == cmp.sr_slave.r_spi_dma_seg_magic_value;
+	if(printout && !test)
+		this->printComp("r_spi_dma_seg_magic_value", this->sr_slave.r_spi_dma_seg_magic_value, cmp.sr_slave.r_spi_dma_seg_magic_value, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_slave.spi_slv_wrbuf_bitlen_en == cmp.sr_slave.spi_slv_wrbuf_bitlen_en;
+	if(printout && !test)
+		this->printComp("spi_slv_wrbuf_bitlen_en", this->sr_slave.spi_slv_wrbuf_bitlen_en, cmp.sr_slave.spi_slv_wrbuf_bitlen_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_slave.spi_slv_rdbuf_bitlen_en == cmp.sr_slave.spi_slv_rdbuf_bitlen_en;
+	if(printout && !test)
+		this->printComp("spi_slv_rdbuf_bitlen_en", this->sr_slave.spi_slv_rdbuf_bitlen_en, cmp.sr_slave.spi_slv_rdbuf_bitlen_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_slave.spi_slv_wrdma_bitlen_en == cmp.sr_slave.spi_slv_wrdma_bitlen_en;
+	if(printout && !test)
+		this->printComp("spi_slv_wrdma_bitlen_en", this->sr_slave.spi_slv_wrdma_bitlen_en, cmp.sr_slave.spi_slv_wrdma_bitlen_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_slave.spi_slv_rddma_bitlen_en == cmp.sr_slave.spi_slv_rddma_bitlen_en;
+	if(printout && !test)
+		this->printComp("spi_slv_rddma_bitlen_en", this->sr_slave.spi_slv_rddma_bitlen_en, cmp.sr_slave.spi_slv_rddma_bitlen_en, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_slave.spi_rsck_data_out == cmp.sr_slave.spi_rsck_data_out;
+	if(printout && !test)
+		this->printComp("spi_rsck_data_out", this->sr_slave.spi_rsck_data_out, cmp.sr_slave.spi_rsck_data_out, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_slave.spi_clk_mode_13 == cmp.sr_slave.spi_clk_mode_13;
+	if(printout && !test)
+		this->printComp("spi_clk_mode_13", this->sr_slave.spi_clk_mode_13, cmp.sr_slave.spi_clk_mode_13, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_slave.spi_clk_mode == cmp.sr_slave.spi_clk_mode;
+	if(printout && !test)
+		this->printComp("spi_clk_mode", this->sr_slave.spi_clk_mode, cmp.sr_slave.spi_clk_mode, "<- cmp");
+	ret &= test;
+	
+
+	return ret;
+}
+bool SpiDebug::comp_sr_slave1(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_slave1.spi_slv_last_addr == cmp.sr_slave1.spi_slv_last_addr;
+	if(printout && !test)
+		this->printComp("spi_slv_last_addr", this->sr_slave1.spi_slv_last_addr, cmp.sr_slave1.spi_slv_last_addr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_slave1.spi_slv_last_command  == cmp.sr_slave1.spi_slv_last_command ;
+	if(printout && !test)
+		this->printComp("spi_slv_last_command ", this->sr_slave1.spi_slv_last_command , cmp.sr_slave1.spi_slv_last_command , "<- cmp");
+	ret &= test;
+	
+	test = this->sr_slave1.spi_slv_data_bitlen == cmp.sr_slave1.spi_slv_data_bitlen;
+	if(printout && !test)
+		this->printComp("spi_slv_data_bitlen", this->sr_slave1.spi_slv_data_bitlen, cmp.sr_slave1.spi_slv_data_bitlen, "<- cmp");
+	ret &= test;
+	
+	return ret;
+}
+
+bool SpiDebug::compClock(SpiDebug cmp, bool printout){
+	bool ret = this->comp_sr_clock(cmp, printout);
+	ret = !ret ? (this->comp_sr_gate(cmp, printout) & ret) : this->comp_sr_gate(cmp, printout);
+	return ret;
+}
+bool SpiDebug::comp_sr_clock(SpiDebug cmp, bool printout){
+	bool ret = true;
+  
+	bool test = this->sr_clock.spi_clk_equ_sysclk_pos == cmp.sr_clock.spi_clk_equ_sysclk_pos;
+	if(printout && !test)
+		this->printComp("spi_clk_equ_sysclk_pos", this->sr_clock.spi_clk_equ_sysclk_pos, cmp.sr_clock.spi_clk_equ_sysclk_pos, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_clock.spi_clkdiv_pre == cmp.sr_clock.spi_clkdiv_pre;
+	if(printout && !test)
+		this->printComp("spi_clkdiv_pre", this->sr_clock.spi_clkdiv_pre, cmp.sr_clock.spi_clkdiv_pre, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_clock.spi_clkcnt_n == cmp.sr_clock.spi_clkcnt_n;
+	if(printout && !test)
+		this->printComp("spi_clkcnt_n", this->sr_clock.spi_clkcnt_n, cmp.sr_clock.spi_clkcnt_n, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_clock.spi_clkcnt_h == cmp.sr_clock.spi_clkcnt_h;
+	if(printout && !test)
+		this->printComp("spi_clkcnt_h", this->sr_clock.spi_clkcnt_h, cmp.sr_clock.spi_clkcnt_h, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_clock.spi_clkcnt_l == cmp.sr_clock.spi_clkcnt_l;
+	if(printout && !test)
+		this->printComp("spi_clkcnt_l", this->sr_clock.spi_clkcnt_l, cmp.sr_clock.spi_clkcnt_l, "<- cmp");
+	ret &= test;
+	
+
+	return ret;
+}
+bool SpiDebug::comp_sr_gate(SpiDebug cmp, bool printout){
+	bool ret = true;
+
+	bool test = this->sr_gate.spi_mst_clk_sel == cmp.sr_gate.spi_mst_clk_sel;
+	if(printout && !test)
+		this->printComp("spi_mst_clk_sel", this->sr_gate.spi_mst_clk_sel, cmp.sr_gate.spi_mst_clk_sel, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_gate.spi_mst_clk_active == cmp.sr_gate.spi_mst_clk_active;
+	if(printout && !test)
+		this->printComp("spi_mst_clk_active", this->sr_gate.spi_mst_clk_active, cmp.sr_gate.spi_mst_clk_active, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_gate.spi_clk_en == cmp.sr_gate.spi_clk_en;
+	if(printout && !test)
+		this->printComp("spi_clk_en", this->sr_gate.spi_clk_en, cmp.sr_gate.spi_clk_en, "<- cmp");
+	ret &= test;
+	
+
+	return ret;
+}
+
+bool SpiDebug::compTiming(SpiDebug cmp, bool printout){
+	bool ret = this->comp_sr_dinmode(cmp, printout);
+	ret = !ret ? (this->comp_sr_dinnum(cmp, printout) & ret) : this->comp_sr_dinnum(cmp, printout);
+	ret = !ret ? (this->comp_sr_doutmode(cmp, printout) & ret) : this->comp_sr_doutmode(cmp, printout);
+
+	return ret;
+}
+bool SpiDebug::comp_sr_dinmode(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_dinmode.spi_timing_hclk_active == cmp.sr_dinmode.spi_timing_hclk_active;
+	if(printout && !test)
+		this->printComp("spi_timing_hclk_active", this->sr_dinmode.spi_timing_hclk_active, cmp.sr_dinmode.spi_timing_hclk_active, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinmode.r_spi_din7_mode == cmp.sr_dinmode.r_spi_din7_mode;
+	if(printout && !test)
+		this->printComp("r_spi_din7_mode", this->sr_dinmode.r_spi_din7_mode, cmp.sr_dinmode.r_spi_din7_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinmode.r_spi_din6_mode == cmp.sr_dinmode.r_spi_din6_mode;
+	if(printout && !test)
+		this->printComp("r_spi_din6_mode", this->sr_dinmode.r_spi_din6_mode, cmp.sr_dinmode.r_spi_din6_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinmode.r_spi_din5_mode == cmp.sr_dinmode.r_spi_din5_mode;
+	if(printout && !test)
+		this->printComp("r_spi_din5_mode", this->sr_dinmode.r_spi_din5_mode, cmp.sr_dinmode.r_spi_din5_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinmode.r_spi_din4_mode == cmp.sr_dinmode.r_spi_din4_mode;
+	if(printout && !test)
+		this->printComp("r_spi_din4_mode", this->sr_dinmode.r_spi_din4_mode, cmp.sr_dinmode.r_spi_din4_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinmode.spi_din3_mode == cmp.sr_dinmode.spi_din3_mode;
+	if(printout && !test)
+		this->printComp("spi_din3_mode", this->sr_dinmode.spi_din3_mode, cmp.sr_dinmode.spi_din3_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinmode.spi_din2_mode == cmp.sr_dinmode.spi_din2_mode;
+	if(printout && !test)
+		this->printComp("spi_din2_mode", this->sr_dinmode.spi_din2_mode, cmp.sr_dinmode.spi_din2_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinmode.spi_din1_mode == cmp.sr_dinmode.spi_din1_mode;
+	if(printout && !test)
+		this->printComp("spi_din1_mode", this->sr_dinmode.spi_din1_mode, cmp.sr_dinmode.spi_din1_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinmode.spi_din0_mode == cmp.sr_dinmode.spi_din0_mode;
+	if(printout && !test)
+		this->printComp("spi_din0_mode", this->sr_dinmode.spi_din0_mode, cmp.sr_dinmode.spi_din0_mode, "<- cmp");
+	ret &= test;
+	
+	return ret;
+}
+bool SpiDebug::comp_sr_dinnum(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_dinnum.r_spi_din7_num == cmp.sr_dinnum.r_spi_din7_num;
+	if(printout && !test)
+		this->printComp("r_spi_din7_num", this->sr_dinnum.r_spi_din7_num, cmp.sr_dinnum.r_spi_din7_num, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinnum.r_spi_din6_num == cmp.sr_dinnum.r_spi_din6_num;
+	if(printout && !test)
+		this->printComp("r_spi_din6_num", this->sr_dinnum.r_spi_din6_num, cmp.sr_dinnum.r_spi_din6_num, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinnum.r_spi_din5_num == cmp.sr_dinnum.r_spi_din5_num;
+	if(printout && !test)
+		this->printComp("r_spi_din5_num", this->sr_dinnum.r_spi_din5_num, cmp.sr_dinnum.r_spi_din5_num, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinnum.r_spi_din4_num == cmp.sr_dinnum.r_spi_din4_num;
+	if(printout && !test)
+		this->printComp("r_spi_din4_num", this->sr_dinnum.r_spi_din4_num, cmp.sr_dinnum.r_spi_din4_num, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinnum.spi_din3_num == cmp.sr_dinnum.spi_din3_num;
+	if(printout && !test)
+		this->printComp("spi_din3_num", this->sr_dinnum.spi_din3_num, cmp.sr_dinnum.spi_din3_num, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinnum.spi_din2_num == cmp.sr_dinnum.spi_din2_num;
+	if(printout && !test)
+		this->printComp("spi_din2_num", this->sr_dinnum.spi_din2_num, cmp.sr_dinnum.spi_din2_num, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinnum.spi_din1_num == cmp.sr_dinnum.spi_din1_num;
+	if(printout && !test)
+		this->printComp("spi_din1_num", this->sr_dinnum.spi_din1_num, cmp.sr_dinnum.spi_din1_num, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dinnum.spi_din0_num == cmp.sr_dinnum.spi_din0_num;
+	if(printout && !test)
+		this->printComp("spi_din0_num", this->sr_dinnum.spi_din0_num, cmp.sr_dinnum.spi_din0_num, "<- cmp");
+	ret &= test;
+	
+
+	return ret;
+}
+bool SpiDebug::comp_sr_doutmode(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_doutmode.r_spi_d_dqs_mode == cmp.sr_doutmode.r_spi_d_dqs_mode;
+	if(printout && !test)
+		this->printComp("r_spi_d_dqs_mode", this->sr_doutmode.r_spi_d_dqs_mode, cmp.sr_doutmode.r_spi_d_dqs_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_doutmode.r_spi_dout7_mode == cmp.sr_doutmode.r_spi_dout7_mode;
+	if(printout && !test)
+		this->printComp("r_spi_dout7_mode", this->sr_doutmode.r_spi_dout7_mode, cmp.sr_doutmode.r_spi_dout7_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_doutmode.r_spi_dout6_mode == cmp.sr_doutmode.r_spi_dout6_mode;
+	if(printout && !test)
+		this->printComp("r_spi_dout6_mode", this->sr_doutmode.r_spi_dout6_mode, cmp.sr_doutmode.r_spi_dout6_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_doutmode.r_spi_dout5_mode == cmp.sr_doutmode.r_spi_dout5_mode;
+	if(printout && !test)
+		this->printComp("r_spi_dout5_mode", this->sr_doutmode.r_spi_dout5_mode, cmp.sr_doutmode.r_spi_dout5_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_doutmode.r_spi_dout4_mode == cmp.sr_doutmode.r_spi_dout4_mode;
+	if(printout && !test)
+		this->printComp("r_spi_dout4_mode", this->sr_doutmode.r_spi_dout4_mode, cmp.sr_doutmode.r_spi_dout4_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_doutmode.spi_dout3_mode == cmp.sr_doutmode.spi_dout3_mode;
+	if(printout && !test)
+		this->printComp("spi_dout3_mode", this->sr_doutmode.spi_dout3_mode, cmp.sr_doutmode.spi_dout3_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_doutmode.spi_dout2_mode == cmp.sr_doutmode.spi_dout2_mode;
+	if(printout && !test)
+		this->printComp("spi_dout2_mode", this->sr_doutmode.spi_dout2_mode, cmp.sr_doutmode.spi_dout2_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_doutmode.spi_dout1_mode == cmp.sr_doutmode.spi_dout1_mode;
+	if(printout && !test)
+		this->printComp("spi_dout1_mode", this->sr_doutmode.spi_dout1_mode, cmp.sr_doutmode.spi_dout1_mode, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_doutmode.spi_dout0_mode == cmp.sr_doutmode.spi_dout0_mode;
+	if(printout && !test)
+		this->printComp("spi_dout0_mode", this->sr_doutmode.spi_dout0_mode, cmp.sr_doutmode.spi_dout0_mode, "<- cmp");
+	ret &= test;
+
+	return ret;
+}
+
+bool SpiDebug::compInterupts(SpiDebug cmp, bool printout){
+	bool ret = this->comp_sr_dmaintena(cmp, printout);
+	ret = !ret ? (this->comp_sr_dmaintclr(cmp, printout) & ret) : this->comp_sr_dmaintclr(cmp, printout);
+	ret = !ret ? (this->comp_sr_dmaintraw(cmp, printout) & ret) : this->comp_sr_dmaintraw(cmp, printout);
+	ret = !ret ? (this->comp_sr_dmaintst(cmp, printout) & ret) : this->comp_sr_dmaintst(cmp, printout);
+	ret = !ret ? (this->comp_sr_dmaintset(cmp, printout) & ret) : this->comp_sr_dmaintset(cmp, printout);
+	return false;
+}
+bool SpiDebug::comp_sr_dmaintena(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_dmaintena.spi_app1_int_ena == cmp.sr_dmaintena.spi_app1_int_ena;
+	if(printout && !test)
+		this->printComp("spi_app1_int_ena", this->sr_dmaintena.spi_app1_int_ena, cmp.sr_dmaintena.spi_app1_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_app2_int_ena == cmp.sr_dmaintena.spi_app2_int_ena;
+	if(printout && !test)
+		this->printComp("spi_app2_int_ena", this->sr_dmaintena.spi_app2_int_ena, cmp.sr_dmaintena.spi_app2_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_mst_tx_afifo_rempty_err_int_ena == cmp.sr_dmaintena.spi_mst_tx_afifo_rempty_err_int_ena;
+	if(printout && !test)
+		this->printComp("spi_mst_tx_afifo_rempty_err_int_ena", this->sr_dmaintena.spi_mst_tx_afifo_rempty_err_int_ena, cmp.sr_dmaintena.spi_mst_tx_afifo_rempty_err_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_mst_rx_afifo_wfull_err_int_ena == cmp.sr_dmaintena.spi_mst_rx_afifo_wfull_err_int_ena;
+	if(printout && !test)
+		this->printComp("spi_mst_rx_afifo_wfull_err_int_ena", this->sr_dmaintena.spi_mst_rx_afifo_wfull_err_int_ena, cmp.sr_dmaintena.spi_mst_rx_afifo_wfull_err_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_slv_cmd_err_int_ena == cmp.sr_dmaintena.spi_slv_cmd_err_int_ena;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd_err_int_ena", this->sr_dmaintena.spi_slv_cmd_err_int_ena, cmp.sr_dmaintena.spi_slv_cmd_err_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.r_spi_seg_magic_err_int_ena == cmp.sr_dmaintena.r_spi_seg_magic_err_int_ena;
+	if(printout && !test)
+		this->printComp("r_spi_seg_magic_err_int_ena", this->sr_dmaintena.r_spi_seg_magic_err_int_ena, cmp.sr_dmaintena.r_spi_seg_magic_err_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_dma_seg_trans_done_int_ena == cmp.sr_dmaintena.spi_dma_seg_trans_done_int_ena;
+	if(printout && !test)
+		this->printComp("spi_dma_seg_trans_done_int_ena", this->sr_dmaintena.spi_dma_seg_trans_done_int_ena, cmp.sr_dmaintena.spi_dma_seg_trans_done_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_trans_done_int_ena == cmp.sr_dmaintena.spi_trans_done_int_ena;
+	if(printout && !test)
+		this->printComp("spi_trans_done_int_ena", this->sr_dmaintena.spi_trans_done_int_ena, cmp.sr_dmaintena.spi_trans_done_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_slv_wr_buf_done_int_ena == cmp.sr_dmaintena.spi_slv_wr_buf_done_int_ena;
+	if(printout && !test)
+		this->printComp("spi_slv_wr_buf_done_int_ena", this->sr_dmaintena.spi_slv_wr_buf_done_int_ena, cmp.sr_dmaintena.spi_slv_wr_buf_done_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_slv_rd_buf_done_int_ena == cmp.sr_dmaintena.spi_slv_rd_buf_done_int_ena;
+	if(printout && !test)
+		this->printComp("spi_slv_rd_buf_done_int_ena", this->sr_dmaintena.spi_slv_rd_buf_done_int_ena, cmp.sr_dmaintena.spi_slv_rd_buf_done_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_slv_wr_dma_done_int_ena == cmp.sr_dmaintena.spi_slv_wr_dma_done_int_ena;
+	if(printout && !test)
+		this->printComp("spi_slv_wr_dma_done_int_ena", this->sr_dmaintena.spi_slv_wr_dma_done_int_ena, cmp.sr_dmaintena.spi_slv_wr_dma_done_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_slv_rd_dma_done_int_ena == cmp.sr_dmaintena.spi_slv_rd_dma_done_int_ena;
+	if(printout && !test)
+		this->printComp("spi_slv_rd_dma_done_int_ena", this->sr_dmaintena.spi_slv_rd_dma_done_int_ena, cmp.sr_dmaintena.spi_slv_rd_dma_done_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_slv_cmda_int_ena == cmp.sr_dmaintena.spi_slv_cmda_int_ena;
+	if(printout && !test)
+		this->printComp("spi_slv_cmda_int_ena", this->sr_dmaintena.spi_slv_cmda_int_ena, cmp.sr_dmaintena.spi_slv_cmda_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_slv_cmd9_int_ena == cmp.sr_dmaintena.spi_slv_cmd9_int_ena;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd9_int_ena", this->sr_dmaintena.spi_slv_cmd9_int_ena, cmp.sr_dmaintena.spi_slv_cmd9_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_slv_cmd8_int_ena == cmp.sr_dmaintena.spi_slv_cmd8_int_ena;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd8_int_ena", this->sr_dmaintena.spi_slv_cmd8_int_ena, cmp.sr_dmaintena.spi_slv_cmd8_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_slv_cmd7_int_ena == cmp.sr_dmaintena.spi_slv_cmd7_int_ena;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd7_int_ena", this->sr_dmaintena.spi_slv_cmd7_int_ena, cmp.sr_dmaintena.spi_slv_cmd7_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_slv_en_qpi_int_ena == cmp.sr_dmaintena.spi_slv_en_qpi_int_ena;
+	if(printout && !test)
+		this->printComp("spi_slv_en_qpi_int_ena", this->sr_dmaintena.spi_slv_en_qpi_int_ena, cmp.sr_dmaintena.spi_slv_en_qpi_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_slv_ex_qpi_int_ena == cmp.sr_dmaintena.spi_slv_ex_qpi_int_ena;
+	if(printout && !test)
+		this->printComp("spi_slv_ex_qpi_int_ena", this->sr_dmaintena.spi_slv_ex_qpi_int_ena, cmp.sr_dmaintena.spi_slv_ex_qpi_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_dma_outfifo_empty_err_int_ena == cmp.sr_dmaintena.spi_dma_outfifo_empty_err_int_ena;
+	if(printout && !test)
+		this->printComp("spi_dma_outfifo_empty_err_int_ena", this->sr_dmaintena.spi_dma_outfifo_empty_err_int_ena, cmp.sr_dmaintena.spi_dma_outfifo_empty_err_int_ena, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintena.spi_dma_infifo_full_err_int_ena == cmp.sr_dmaintena.spi_dma_infifo_full_err_int_ena;
+	if(printout && !test)
+		this->printComp("spi_dma_infifo_full_err_int_ena", this->sr_dmaintena.spi_dma_infifo_full_err_int_ena, cmp.sr_dmaintena.spi_dma_infifo_full_err_int_ena, "<- cmp");
+	ret &= test;
+	
+	return ret;
+}
+bool SpiDebug::comp_sr_dmaintclr(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_dmaintclr.spi_app1_int_clr == cmp.sr_dmaintclr.spi_app1_int_clr;
+	if(printout && !test)
+		this->printComp("spi_app1_int_clr", this->sr_dmaintclr.spi_app1_int_clr, cmp.sr_dmaintclr.spi_app1_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_app2_int_clr == cmp.sr_dmaintclr.spi_app2_int_clr;
+	if(printout && !test)
+		this->printComp("spi_app2_int_clr", this->sr_dmaintclr.spi_app2_int_clr, cmp.sr_dmaintclr.spi_app2_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_mst_tx_afifo_rempty_err_int_clr == cmp.sr_dmaintclr.spi_mst_tx_afifo_rempty_err_int_clr;
+	if(printout && !test)
+		this->printComp("spi_mst_tx_afifo_rempty_err_int_clr", this->sr_dmaintclr.spi_mst_tx_afifo_rempty_err_int_clr, cmp.sr_dmaintclr.spi_mst_tx_afifo_rempty_err_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_mst_rx_afifo_wfull_err_int_clr == cmp.sr_dmaintclr.spi_mst_rx_afifo_wfull_err_int_clr;
+	if(printout && !test)
+		this->printComp("spi_mst_rx_afifo_wfull_err_int_clr", this->sr_dmaintclr.spi_mst_rx_afifo_wfull_err_int_clr, cmp.sr_dmaintclr.spi_mst_rx_afifo_wfull_err_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_slv_cmd_err_int_clr == cmp.sr_dmaintclr.spi_slv_cmd_err_int_clr;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd_err_int_clr", this->sr_dmaintclr.spi_slv_cmd_err_int_clr, cmp.sr_dmaintclr.spi_slv_cmd_err_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.r_spi_seg_magic_err_int_clr == cmp.sr_dmaintclr.r_spi_seg_magic_err_int_clr;
+	if(printout && !test)
+		this->printComp("r_spi_seg_magic_err_int_clr", this->sr_dmaintclr.r_spi_seg_magic_err_int_clr, cmp.sr_dmaintclr.r_spi_seg_magic_err_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_dma_seg_trans_done_int_clr == cmp.sr_dmaintclr.spi_dma_seg_trans_done_int_clr;
+	if(printout && !test)
+		this->printComp("spi_dma_seg_trans_done_int_clr", this->sr_dmaintclr.spi_dma_seg_trans_done_int_clr, cmp.sr_dmaintclr.spi_dma_seg_trans_done_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_trans_done_int_clr == cmp.sr_dmaintclr.spi_trans_done_int_clr;
+	if(printout && !test)
+		this->printComp("spi_trans_done_int_clr", this->sr_dmaintclr.spi_trans_done_int_clr, cmp.sr_dmaintclr.spi_trans_done_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_slv_wr_buf_done_int_clr == cmp.sr_dmaintclr.spi_slv_wr_buf_done_int_clr;
+	if(printout && !test)
+		this->printComp("spi_slv_wr_buf_done_int_clr", this->sr_dmaintclr.spi_slv_wr_buf_done_int_clr, cmp.sr_dmaintclr.spi_slv_wr_buf_done_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_slv_rd_buf_done_int_clr == cmp.sr_dmaintclr.spi_slv_rd_buf_done_int_clr;
+	if(printout && !test)
+		this->printComp("spi_slv_rd_buf_done_int_clr", this->sr_dmaintclr.spi_slv_rd_buf_done_int_clr, cmp.sr_dmaintclr.spi_slv_rd_buf_done_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_slv_wr_dma_done_int_clr == cmp.sr_dmaintclr.spi_slv_wr_dma_done_int_clr;
+	if(printout && !test)
+		this->printComp("spi_slv_wr_dma_done_int_clr", this->sr_dmaintclr.spi_slv_wr_dma_done_int_clr, cmp.sr_dmaintclr.spi_slv_wr_dma_done_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_slv_rd_dma_done_int_clr == cmp.sr_dmaintclr.spi_slv_rd_dma_done_int_clr;
+	if(printout && !test)
+		this->printComp("spi_slv_rd_dma_done_int_clr", this->sr_dmaintclr.spi_slv_rd_dma_done_int_clr, cmp.sr_dmaintclr.spi_slv_rd_dma_done_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_slv_cmda_int_clr == cmp.sr_dmaintclr.spi_slv_cmda_int_clr;
+	if(printout && !test)
+		this->printComp("spi_slv_cmda_int_clr", this->sr_dmaintclr.spi_slv_cmda_int_clr, cmp.sr_dmaintclr.spi_slv_cmda_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_slv_cmd9_int_clr == cmp.sr_dmaintclr.spi_slv_cmd9_int_clr;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd9_int_clr", this->sr_dmaintclr.spi_slv_cmd9_int_clr, cmp.sr_dmaintclr.spi_slv_cmd9_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_slv_cmd8_int_clr == cmp.sr_dmaintclr.spi_slv_cmd8_int_clr;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd8_int_clr", this->sr_dmaintclr.spi_slv_cmd8_int_clr, cmp.sr_dmaintclr.spi_slv_cmd8_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_slv_cmd7_int_clr == cmp.sr_dmaintclr.spi_slv_cmd7_int_clr;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd7_int_clr", this->sr_dmaintclr.spi_slv_cmd7_int_clr, cmp.sr_dmaintclr.spi_slv_cmd7_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_slv_en_qpi_int_clr == cmp.sr_dmaintclr.spi_slv_en_qpi_int_clr;
+	if(printout && !test)
+		this->printComp("spi_slv_en_qpi_int_clr", this->sr_dmaintclr.spi_slv_en_qpi_int_clr, cmp.sr_dmaintclr.spi_slv_en_qpi_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_slv_ex_qpi_int_clr == cmp.sr_dmaintclr.spi_slv_ex_qpi_int_clr;
+	if(printout && !test)
+		this->printComp("spi_slv_ex_qpi_int_clr", this->sr_dmaintclr.spi_slv_ex_qpi_int_clr, cmp.sr_dmaintclr.spi_slv_ex_qpi_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_dma_outfifo_empty_err_int_clr == cmp.sr_dmaintclr.spi_dma_outfifo_empty_err_int_clr;
+	if(printout && !test)
+		this->printComp("spi_dma_outfifo_empty_err_int_clr", this->sr_dmaintclr.spi_dma_outfifo_empty_err_int_clr, cmp.sr_dmaintclr.spi_dma_outfifo_empty_err_int_clr, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintclr.spi_dma_infifo_full_err_int_clr == cmp.sr_dmaintclr.spi_dma_infifo_full_err_int_clr;
+	if(printout && !test)
+		this->printComp("spi_dma_infifo_full_err_int_clr", this->sr_dmaintclr.spi_dma_infifo_full_err_int_clr, cmp.sr_dmaintclr.spi_dma_infifo_full_err_int_clr, "<- cmp");
+	ret &= test;
+
+	return ret;
+}
+bool SpiDebug::comp_sr_dmaintraw(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_dmaintraw.spi_app1_int_raw == cmp.sr_dmaintraw.spi_app1_int_raw;
+	if(printout && !test)
+		this->printComp("spi_app1_int_raw", this->sr_dmaintraw.spi_app1_int_raw, cmp.sr_dmaintraw.spi_app1_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_app2_int_raw == cmp.sr_dmaintraw.spi_app2_int_raw;
+	if(printout && !test)
+		this->printComp("spi_app2_int_raw", this->sr_dmaintraw.spi_app2_int_raw, cmp.sr_dmaintraw.spi_app2_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_mst_tx_afifo_rempty_err_int_raw == cmp.sr_dmaintraw.spi_mst_tx_afifo_rempty_err_int_raw;
+	if(printout && !test)
+		this->printComp("spi_mst_tx_afifo_rempty_err_int_raw", this->sr_dmaintraw.spi_mst_tx_afifo_rempty_err_int_raw, cmp.sr_dmaintraw.spi_mst_tx_afifo_rempty_err_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_mst_rx_afifo_wfull_err_int_raw == cmp.sr_dmaintraw.spi_mst_rx_afifo_wfull_err_int_raw;
+	if(printout && !test)
+		this->printComp("spi_mst_rx_afifo_wfull_err_int_raw", this->sr_dmaintraw.spi_mst_rx_afifo_wfull_err_int_raw, cmp.sr_dmaintraw.spi_mst_rx_afifo_wfull_err_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_slv_cmd_err_int_raw == cmp.sr_dmaintraw.spi_slv_cmd_err_int_raw;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd_err_int_raw", this->sr_dmaintraw.spi_slv_cmd_err_int_raw, cmp.sr_dmaintraw.spi_slv_cmd_err_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.r_spi_seg_magic_err_int_raw == cmp.sr_dmaintraw.r_spi_seg_magic_err_int_raw;
+	if(printout && !test)
+		this->printComp("r_spi_seg_magic_err_int_raw", this->sr_dmaintraw.r_spi_seg_magic_err_int_raw, cmp.sr_dmaintraw.r_spi_seg_magic_err_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_dma_seg_trans_done_int_raw == cmp.sr_dmaintraw.spi_dma_seg_trans_done_int_raw;
+	if(printout && !test)
+		this->printComp("spi_dma_seg_trans_done_int_raw", this->sr_dmaintraw.spi_dma_seg_trans_done_int_raw, cmp.sr_dmaintraw.spi_dma_seg_trans_done_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_trans_done_int_raw == cmp.sr_dmaintraw.spi_trans_done_int_raw;
+	if(printout && !test)
+		this->printComp("spi_trans_done_int_raw", this->sr_dmaintraw.spi_trans_done_int_raw, cmp.sr_dmaintraw.spi_trans_done_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_slv_wr_buf_done_int_raw == cmp.sr_dmaintraw.spi_slv_wr_buf_done_int_raw;
+	if(printout && !test)
+		this->printComp("spi_slv_wr_buf_done_int_raw", this->sr_dmaintraw.spi_slv_wr_buf_done_int_raw, cmp.sr_dmaintraw.spi_slv_wr_buf_done_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_slv_rd_buf_done_int_raw == cmp.sr_dmaintraw.spi_slv_rd_buf_done_int_raw;
+	if(printout && !test)
+		this->printComp("spi_slv_rd_buf_done_int_raw", this->sr_dmaintraw.spi_slv_rd_buf_done_int_raw, cmp.sr_dmaintraw.spi_slv_rd_buf_done_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_slv_wr_dma_done_int_raw == cmp.sr_dmaintraw.spi_slv_wr_dma_done_int_raw;
+	if(printout && !test)
+		this->printComp("spi_slv_wr_dma_done_int_raw", this->sr_dmaintraw.spi_slv_wr_dma_done_int_raw, cmp.sr_dmaintraw.spi_slv_wr_dma_done_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_slv_rd_dma_done_int_raw == cmp.sr_dmaintraw.spi_slv_rd_dma_done_int_raw;
+	if(printout && !test)
+		this->printComp("spi_slv_rd_dma_done_int_raw", this->sr_dmaintraw.spi_slv_rd_dma_done_int_raw, cmp.sr_dmaintraw.spi_slv_rd_dma_done_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_slv_cmda_int_raw == cmp.sr_dmaintraw.spi_slv_cmda_int_raw;
+	if(printout && !test)
+		this->printComp("spi_slv_cmda_int_raw", this->sr_dmaintraw.spi_slv_cmda_int_raw, cmp.sr_dmaintraw.spi_slv_cmda_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_slv_cmd9_int_raw == cmp.sr_dmaintraw.spi_slv_cmd9_int_raw;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd9_int_raw", this->sr_dmaintraw.spi_slv_cmd9_int_raw, cmp.sr_dmaintraw.spi_slv_cmd9_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_slv_cmd8_int_raw == cmp.sr_dmaintraw.spi_slv_cmd8_int_raw;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd8_int_raw", this->sr_dmaintraw.spi_slv_cmd8_int_raw, cmp.sr_dmaintraw.spi_slv_cmd8_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_slv_cmd7_int_raw == cmp.sr_dmaintraw.spi_slv_cmd7_int_raw;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd7_int_raw", this->sr_dmaintraw.spi_slv_cmd7_int_raw, cmp.sr_dmaintraw.spi_slv_cmd7_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_slv_en_qpi_int_raw == cmp.sr_dmaintraw.spi_slv_en_qpi_int_raw;
+	if(printout && !test)
+		this->printComp("spi_slv_en_qpi_int_raw", this->sr_dmaintraw.spi_slv_en_qpi_int_raw, cmp.sr_dmaintraw.spi_slv_en_qpi_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_slv_ex_qpi_int_raw == cmp.sr_dmaintraw.spi_slv_ex_qpi_int_raw;
+	if(printout && !test)
+		this->printComp("spi_slv_ex_qpi_int_raw", this->sr_dmaintraw.spi_slv_ex_qpi_int_raw, cmp.sr_dmaintraw.spi_slv_ex_qpi_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_dma_outfifo_empty_err_int_raw == cmp.sr_dmaintraw.spi_dma_outfifo_empty_err_int_raw;
+	if(printout && !test)
+		this->printComp("spi_dma_outfifo_empty_err_int_raw", this->sr_dmaintraw.spi_dma_outfifo_empty_err_int_raw, cmp.sr_dmaintraw.spi_dma_outfifo_empty_err_int_raw, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintraw.spi_dma_infifo_full_err_int_raw == cmp.sr_dmaintraw.spi_dma_infifo_full_err_int_raw;
+	if(printout && !test)
+		this->printComp("spi_dma_infifo_full_err_int_raw", this->sr_dmaintraw.spi_dma_infifo_full_err_int_raw, cmp.sr_dmaintraw.spi_dma_infifo_full_err_int_raw, "<- cmp");
+	ret &= test;
+
+	return ret;
+}
+bool SpiDebug::comp_sr_dmaintst(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_dmaintst.spi_app1_int_st == cmp.sr_dmaintst.spi_app1_int_st;
+	if(printout && !test)
+		this->printComp("spi_app1_int_st", this->sr_dmaintst.spi_app1_int_st, cmp.sr_dmaintst.spi_app1_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_app2_int_st == cmp.sr_dmaintst.spi_app2_int_st;
+	if(printout && !test)
+		this->printComp("spi_app2_int_st", this->sr_dmaintst.spi_app2_int_st, cmp.sr_dmaintst.spi_app2_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_mst_tx_afifo_rempty_err_int_st == cmp.sr_dmaintst.spi_mst_tx_afifo_rempty_err_int_st;
+	if(printout && !test)
+		this->printComp("spi_mst_tx_afifo_rempty_err_int_st", this->sr_dmaintst.spi_mst_tx_afifo_rempty_err_int_st, cmp.sr_dmaintst.spi_mst_tx_afifo_rempty_err_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_mst_rx_afifo_wfull_err_int_st == cmp.sr_dmaintst.spi_mst_rx_afifo_wfull_err_int_st;
+	if(printout && !test)
+		this->printComp("spi_mst_rx_afifo_wfull_err_int_st", this->sr_dmaintst.spi_mst_rx_afifo_wfull_err_int_st, cmp.sr_dmaintst.spi_mst_rx_afifo_wfull_err_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_slv_cmd_err_int_st == cmp.sr_dmaintst.spi_slv_cmd_err_int_st;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd_err_int_st", this->sr_dmaintst.spi_slv_cmd_err_int_st, cmp.sr_dmaintst.spi_slv_cmd_err_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.r_spi_seg_magic_err_int_st == cmp.sr_dmaintst.r_spi_seg_magic_err_int_st;
+	if(printout && !test)
+		this->printComp("r_spi_seg_magic_err_int_st", this->sr_dmaintst.r_spi_seg_magic_err_int_st, cmp.sr_dmaintst.r_spi_seg_magic_err_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_dma_seg_trans_done_int_st == cmp.sr_dmaintst.spi_dma_seg_trans_done_int_st;
+	if(printout && !test)
+		this->printComp("spi_dma_seg_trans_done_int_st", this->sr_dmaintst.spi_dma_seg_trans_done_int_st, cmp.sr_dmaintst.spi_dma_seg_trans_done_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_trans_done_int_st == cmp.sr_dmaintst.spi_trans_done_int_st;
+	if(printout && !test)
+		this->printComp("spi_trans_done_int_st", this->sr_dmaintst.spi_trans_done_int_st, cmp.sr_dmaintst.spi_trans_done_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_slv_wr_buf_done_int_st == cmp.sr_dmaintst.spi_slv_wr_buf_done_int_st;
+	if(printout && !test)
+		this->printComp("spi_slv_wr_buf_done_int_st", this->sr_dmaintst.spi_slv_wr_buf_done_int_st, cmp.sr_dmaintst.spi_slv_wr_buf_done_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_slv_rd_buf_done_int_st == cmp.sr_dmaintst.spi_slv_rd_buf_done_int_st;
+	if(printout && !test)
+		this->printComp("spi_slv_rd_buf_done_int_st", this->sr_dmaintst.spi_slv_rd_buf_done_int_st, cmp.sr_dmaintst.spi_slv_rd_buf_done_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_slv_wr_dma_done_int_st == cmp.sr_dmaintst.spi_slv_wr_dma_done_int_st;
+	if(printout && !test)
+		this->printComp("spi_slv_wr_dma_done_int_st", this->sr_dmaintst.spi_slv_wr_dma_done_int_st, cmp.sr_dmaintst.spi_slv_wr_dma_done_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_slv_rd_dma_done_int_st == cmp.sr_dmaintst.spi_slv_rd_dma_done_int_st;
+	if(printout && !test)
+		this->printComp("spi_slv_rd_dma_done_int_st", this->sr_dmaintst.spi_slv_rd_dma_done_int_st, cmp.sr_dmaintst.spi_slv_rd_dma_done_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_slv_cmda_int_st == cmp.sr_dmaintst.spi_slv_cmda_int_st;
+	if(printout && !test)
+		this->printComp("spi_slv_cmda_int_st", this->sr_dmaintst.spi_slv_cmda_int_st, cmp.sr_dmaintst.spi_slv_cmda_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_slv_cmd9_int_st == cmp.sr_dmaintst.spi_slv_cmd9_int_st;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd9_int_st", this->sr_dmaintst.spi_slv_cmd9_int_st, cmp.sr_dmaintst.spi_slv_cmd9_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_slv_cmd8_int_st == cmp.sr_dmaintst.spi_slv_cmd8_int_st;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd8_int_st", this->sr_dmaintst.spi_slv_cmd8_int_st, cmp.sr_dmaintst.spi_slv_cmd8_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_slv_cmd7_int_st == cmp.sr_dmaintst.spi_slv_cmd7_int_st;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd7_int_st", this->sr_dmaintst.spi_slv_cmd7_int_st, cmp.sr_dmaintst.spi_slv_cmd7_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_slv_en_qpi_int_st == cmp.sr_dmaintst.spi_slv_en_qpi_int_st;
+	if(printout && !test)
+		this->printComp("spi_slv_en_qpi_int_st", this->sr_dmaintst.spi_slv_en_qpi_int_st, cmp.sr_dmaintst.spi_slv_en_qpi_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_slv_ex_qpi_int_st == cmp.sr_dmaintst.spi_slv_ex_qpi_int_st;
+	if(printout && !test)
+		this->printComp("spi_slv_ex_qpi_int_st", this->sr_dmaintst.spi_slv_ex_qpi_int_st, cmp.sr_dmaintst.spi_slv_ex_qpi_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_dma_outfifo_empty_err_int_st == cmp.sr_dmaintst.spi_dma_outfifo_empty_err_int_st;
+	if(printout && !test)
+		this->printComp("spi_dma_outfifo_empty_err_int_st", this->sr_dmaintst.spi_dma_outfifo_empty_err_int_st, cmp.sr_dmaintst.spi_dma_outfifo_empty_err_int_st, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintst.spi_dma_infifo_full_err_int_st == cmp.sr_dmaintst.spi_dma_infifo_full_err_int_st;
+	if(printout && !test)
+		this->printComp("spi_dma_infifo_full_err_int_st", this->sr_dmaintst.spi_dma_infifo_full_err_int_st, cmp.sr_dmaintst.spi_dma_infifo_full_err_int_st, "<- cmp");
+	ret &= test;
+
+	return ret;
+}
+bool SpiDebug::comp_sr_dmaintset(SpiDebug cmp, bool printout){
+	bool ret = true;
+	bool test = this->sr_dmaintset.spi_app1_int_set == cmp.sr_dmaintset.spi_app1_int_set;
+	if(printout && !test)
+		this->printComp("spi_app1_int_set", this->sr_dmaintset.spi_app1_int_set, cmp.sr_dmaintset.spi_app1_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_app2_int_set == cmp.sr_dmaintset.spi_app2_int_set;
+	if(printout && !test)
+		this->printComp("spi_app2_int_set", this->sr_dmaintset.spi_app2_int_set, cmp.sr_dmaintset.spi_app2_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_mst_tx_afifo_rempty_err_int_set == cmp.sr_dmaintset.spi_mst_tx_afifo_rempty_err_int_set;
+	if(printout && !test)
+		this->printComp("spi_mst_tx_afifo_rempty_err_int_set", this->sr_dmaintset.spi_mst_tx_afifo_rempty_err_int_set, cmp.sr_dmaintset.spi_mst_tx_afifo_rempty_err_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_mst_rx_afifo_wfull_err_int_set == cmp.sr_dmaintset.spi_mst_rx_afifo_wfull_err_int_set;
+	if(printout && !test)
+		this->printComp("spi_mst_rx_afifo_wfull_err_int_set", this->sr_dmaintset.spi_mst_rx_afifo_wfull_err_int_set, cmp.sr_dmaintset.spi_mst_rx_afifo_wfull_err_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_slv_cmd_err_int_set == cmp.sr_dmaintset.spi_slv_cmd_err_int_set;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd_err_int_set", this->sr_dmaintset.spi_slv_cmd_err_int_set, cmp.sr_dmaintset.spi_slv_cmd_err_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.r_spi_seg_magic_err_int_set == cmp.sr_dmaintset.r_spi_seg_magic_err_int_set;
+	if(printout && !test)
+		this->printComp("r_spi_seg_magic_err_int_set", this->sr_dmaintset.r_spi_seg_magic_err_int_set, cmp.sr_dmaintset.r_spi_seg_magic_err_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_dma_seg_trans_done_int_set == cmp.sr_dmaintset.spi_dma_seg_trans_done_int_set;
+	if(printout && !test)
+		this->printComp("spi_dma_seg_trans_done_int_set", this->sr_dmaintset.spi_dma_seg_trans_done_int_set, cmp.sr_dmaintset.spi_dma_seg_trans_done_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_trans_done_int_set == cmp.sr_dmaintset.spi_trans_done_int_set;
+	if(printout && !test)
+		this->printComp("spi_trans_done_int_set", this->sr_dmaintset.spi_trans_done_int_set, cmp.sr_dmaintset.spi_trans_done_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_slv_wr_buf_done_int_set == cmp.sr_dmaintset.spi_slv_wr_buf_done_int_set;
+	if(printout && !test)
+		this->printComp("spi_slv_wr_buf_done_int_set", this->sr_dmaintset.spi_slv_wr_buf_done_int_set, cmp.sr_dmaintset.spi_slv_wr_buf_done_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_slv_rd_buf_done_int_set == cmp.sr_dmaintset.spi_slv_rd_buf_done_int_set;
+	if(printout && !test)
+		this->printComp("spi_slv_rd_buf_done_int_set", this->sr_dmaintset.spi_slv_rd_buf_done_int_set, cmp.sr_dmaintset.spi_slv_rd_buf_done_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_slv_wr_dma_done_int_set == cmp.sr_dmaintset.spi_slv_wr_dma_done_int_set;
+	if(printout && !test)
+		this->printComp("spi_slv_wr_dma_done_int_set", this->sr_dmaintset.spi_slv_wr_dma_done_int_set, cmp.sr_dmaintset.spi_slv_wr_dma_done_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_slv_rd_dma_done_int_set == cmp.sr_dmaintset.spi_slv_rd_dma_done_int_set;
+	if(printout && !test)
+		this->printComp("spi_slv_rd_dma_done_int_set", this->sr_dmaintset.spi_slv_rd_dma_done_int_set, cmp.sr_dmaintset.spi_slv_rd_dma_done_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_slv_cmda_int_set == cmp.sr_dmaintset.spi_slv_cmda_int_set;
+	if(printout && !test)
+		this->printComp("spi_slv_cmda_int_set", this->sr_dmaintset.spi_slv_cmda_int_set, cmp.sr_dmaintset.spi_slv_cmda_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_slv_cmd9_int_set == cmp.sr_dmaintset.spi_slv_cmd9_int_set;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd9_int_set", this->sr_dmaintset.spi_slv_cmd9_int_set, cmp.sr_dmaintset.spi_slv_cmd9_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_slv_cmd8_int_set == cmp.sr_dmaintset.spi_slv_cmd8_int_set;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd8_int_set", this->sr_dmaintset.spi_slv_cmd8_int_set, cmp.sr_dmaintset.spi_slv_cmd8_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_slv_cmd7_int_set == cmp.sr_dmaintset.spi_slv_cmd7_int_set;
+	if(printout && !test)
+		this->printComp("spi_slv_cmd7_int_set", this->sr_dmaintset.spi_slv_cmd7_int_set, cmp.sr_dmaintset.spi_slv_cmd7_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_slv_en_qpi_int_set == cmp.sr_dmaintset.spi_slv_en_qpi_int_set;
+	if(printout && !test)
+		this->printComp("spi_slv_en_qpi_int_set", this->sr_dmaintset.spi_slv_en_qpi_int_set, cmp.sr_dmaintset.spi_slv_en_qpi_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_slv_ex_qpi_int_set == cmp.sr_dmaintset.spi_slv_ex_qpi_int_set;
+	if(printout && !test)
+		this->printComp("spi_slv_ex_qpi_int_set", this->sr_dmaintset.spi_slv_ex_qpi_int_set, cmp.sr_dmaintset.spi_slv_ex_qpi_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_dma_outfifo_empty_err_int_set == cmp.sr_dmaintset.spi_dma_outfifo_empty_err_int_set;
+	if(printout && !test)
+		this->printComp("spi_dma_outfifo_empty_err_int_set", this->sr_dmaintset.spi_dma_outfifo_empty_err_int_set, cmp.sr_dmaintset.spi_dma_outfifo_empty_err_int_set, "<- cmp");
+	ret &= test;
+	
+	test = this->sr_dmaintset.spi_dma_infifo_full_err_int_set == cmp.sr_dmaintset.spi_dma_infifo_full_err_int_set;
+	if(printout && !test)
+		this->printComp("spi_dma_infifo_full_err_int_set", this->sr_dmaintset.spi_dma_infifo_full_err_int_set, cmp.sr_dmaintset.spi_dma_infifo_full_err_int_set, "<- cmp");
+	ret &= test;
+
+	return ret;
+}
+
+bool SpiDebug::compAll(SpiDebug cmp, bool printout){
+	int ret = true;
+	this->compUserDef(cmp, printout);
+	this->compCtrlConf(cmp, printout);
+	this->compClock(cmp, printout);
+	this->compTiming(cmp, printout);
+	this->compInterupts(cmp, printout);
+	return ret;
+}
+
 /// Make sure to init/refresh before invoking.
 bool SpiDebug::isSlave(void){
   return this->sr_slave.spi_slave_mode;
 }
+
+
+
