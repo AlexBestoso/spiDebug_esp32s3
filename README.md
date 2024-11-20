@@ -15,8 +15,9 @@ Useage :
 
 ## Detecting configuration Changes
 <p>
-To detect changes in SPI configurations, use the following psudo code into consideration:
-<code>
+To detect changes in SPI configurations, use the following psudo code into consideration:</p>
+
+```
 SpiDebug dbgA;
 SpiDebug dbgB;
 
@@ -28,10 +29,14 @@ EnableSomeSpiDevice();
 dbgB.refresh();
 
 dbgA.compAll(dbgB, true);
-</code><br><br>
-The above would produce a result similar to this:
+```
 
-<code>
+<p>
+<br><br>
+The above would produce a result similar to this:
+</p>
+
+```
 ~~~User Defined Register Compairisons~~~
 spi_usr_miso (0x0) vs (0x1) <- cmp
 spi_usr_mosi (0x0) vs (0x1) <- cmp
@@ -44,5 +49,4 @@ spi_slv_tx_seg_trans_clr_en (0x0) vs (0x1) <- cmp
 spi_slv_rx_seg_trans_clr_en (0x0) vs (0x1) <- cmp
 spi_dma_infifo_full (0x0) vs (0x1) <- cmp
 spi_dma_outfifo_empty (0x0) vs (0x1) <- cmp
-</code>
-</p>
+```
